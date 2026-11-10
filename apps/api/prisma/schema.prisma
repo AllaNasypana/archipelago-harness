@@ -1,0 +1,11 @@
+// NestJS-owned schema `app` only (AGENTS.md §3.4, §4.2). Never model `bff` tables here.
+// Models are added per approved story/spec; none exist yet.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/infrastructure/database/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

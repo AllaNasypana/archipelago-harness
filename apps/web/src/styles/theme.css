@@ -1,0 +1,79 @@
+/*
+ * Design tokens — the single source of colors, radii and fonts.
+ * Light theme only (no dark mode in MVP). Values follow the reference mockups in
+ * docs/design/mockups/general/: white/gray surfaces, one orange accent.
+ *
+ * Names match shadcn/ui, so generated components pick them up unchanged.
+ * Use the Tailwind utilities (bg-primary, text-muted-foreground, border-border, ...),
+ * not raw hex values, in components.
+ */
+
+:root {
+  --background: #f7f8fa; /* page canvas */
+  --foreground: #111827;
+
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+
+  --primary: #f15a24; /* orange accent: primary actions, active nav */
+  --primary-foreground: #ffffff;
+  --primary-soft: #fff1ea; /* active nav item, selected tab, accent badge */
+
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #fff1ea;
+  --accent-foreground: #c2410c;
+
+  --destructive: #dc2626;
+  --success: #16a34a;
+  --success-soft: #eaf7ee;
+  --warning: #d97706;
+  --warning-soft: #fef6e7;
+  --info: #2563eb;
+  --info-soft: #eef4ff;
+
+  --border: #e5e7eb;
+  --input: #d1d5db;
+  --ring: #f15a24;
+
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}

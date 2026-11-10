@@ -1,0 +1,18 @@
+# Execution state of the story-delivery workflow. Schema: docs/workflow/state-schema.md
+# Writer: story-orchestrator ONLY. Stage Skills never write this file.
+version: 1
+workflow: story-delivery
+story: null
+layer: null
+status: IDLE
+current_stage: null
+previous_stage: null
+attempt: 1
+last_result: null
+pending_human_gate: null
+blocking_issues: []
+non_blocking_findings: 0
+started_at: null
+updated_at: null
+completed_at: null
+archived_at: null

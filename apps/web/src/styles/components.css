@@ -1,0 +1,53 @@
+/*
+ * Shared style patterns that repeat across many screens.
+ *
+ * Add a class here only when the same utility set appears in 3+ places and is not
+ * better expressed as a React component. Interactive elements (buttons, inputs,
+ * dialogs, tabs) belong in src/components/ui as components, not here.
+ */
+
+@layer components {
+  /* Page heading block: title + one-line description under it. */
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight text-foreground;
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-muted-foreground;
+  }
+
+  /* White content panel used for forms, tables and stat tiles. */
+  .card {
+    @apply rounded-lg border border-border bg-card p-5 text-card-foreground;
+  }
+
+  .section-title {
+    @apply text-base font-semibold text-foreground;
+  }
+
+  /* Small status pill: Active, Completed, Pending, Finalized, P1–P3, ... */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-neutral {
+    @apply bg-muted text-muted-foreground;
+  }
+  .badge-accent {
+    @apply bg-primary-soft text-accent-foreground;
+  }
+  .badge-success {
+    @apply bg-success-soft text-success;
+  }
+  .badge-warning {
+    @apply bg-warning-soft text-warning;
+  }
+  .badge-info {
+    @apply bg-info-soft text-info;
+  }
+
+  /* Aligned digits for durations, percentages and totals in tables. */
+  .numeric {
+    @apply tabular-nums;
+  }
+}

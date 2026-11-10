@@ -1,0 +1,192 @@
+# =============================================================================
+# CANONICAL ARTIFACT PATH REGISTRY — Archipelago
+# =============================================================================
+# The single authoritative source for where every workflow artifact lives and
+# which Skill owns it. Adapted from ai/customer-portal (v1).
+#
+# Layout change vs. customer-portal: all artifacts of one story live in ONE
+# folder, docs/stories/{story_id}/, instead of being spread over ~15 type
+# folders. A person reviewing a story (or a PR) finds everything in one place,
+# and the folder reads in workflow order by name.
+#
+# Rules:
+#   - Skills resolve locations from this registry, never from hard-coded paths.
+#     A Skill may show a resolved example but must say this file is authoritative.
+#   - {story_id} -> canonical Story ID, format US-<epic>-<nn>-<layer>,
+#                   e.g. US-03-02-api (stage-map.yaml pre_workflow.story_id_format)
+#   - {epic}     -> two-digit epic number, e.g. 03
+#   - Exactly one `owner` per artifact. Other Skills may read an artifact but
+#     must not (re)generate one they do not own.
+#   - `applies_to` limits an artifact to story layers (default: both).
+#   - Entries under `project_documents` are inputs with no workflow owner; the
+#     workflow reads them and never edits them.
+#
+# Related authorities:
+#   docs/workflow/stage-map.yaml          workflow + routing
+#   docs/workflow/artifact-lifecycle.md   status vocabularies
+#   docs/workflow/artifact-schema.md      artifact front matter
+#   docs/workflow/state-schema.md         workflow state
+# =============================================================================
+
+version: 1
+
+# --- Project documents (read-only inputs) ------------------------------------
+project_documents:
+  agents_rules: AGENTS.md
+  brd: docs/product/archipelago-business-requirements.md
+  prd: docs/product/Archipelago_PRD_v1.2.md
+  epic: docs/epics/EPIC-{epic}_*.md
+  design_index: docs/design/README.md
+  mockups: docs/design/mockups/
+  adr: docs/adr/ADR-*.md
+
+artifacts:
+  # --- Epic level (before the per-story loop) --------------------------------
+  story_slice:
+    pattern: docs/stories/slices/EPIC-{epic}-slice.md
+    owner: story-slicer
+    note: Proposed story list for one epic; a human approves it before activation.
+
+  # --- Backlog / Story -------------------------------------------------------
+  story:
+    pattern: docs/stories/{story_id}/story.md
+    owner: backlog-sync
+    note: Materialized from the approved story_slice, or imported from GitHub Issues.
+
+  story_catalog:
+    pattern: docs/stories/catalog.yaml
+    owner: backlog-sync
+
+  # --- Clarification ---------------------------------------------------------
+  clarification_report:
+    pattern: docs/stories/{story_id}/clarification-report.md
+    owner: us-clarifier
+
+  open_decisions:
+    pattern: docs/stories/{story_id}/open-decisions.md
+    owner: us-clarifier
+
+  # --- Specification ---------------------------------------------------------
+  specification:
+    pattern: docs/stories/{story_id}/spec.md
+    owner: spec-writer
+
+  specification_review:
+    pattern: docs/stories/{story_id}/spec-review.md
+    owner: spec-verifier
+
+  # --- Design ----------------------------------------------------------------
+  api_design:
+    pattern: docs/stories/{story_id}/api-design.md
+    owner: openapi-designer
+    applies_to: [api]
+
+  openapi:
+    pattern: docs/stories/{story_id}/openapi.yaml
+    owner: openapi-designer
+    applies_to: [api]
+    note: >
+      The story's contract (new/changed paths and schemas). A web story reads
+      it from its api dependency (stage-map.yaml layer_dependencies).
+
+  database_design:
+    pattern: docs/stories/{story_id}/db-design.md
+    owner: db-designer
+
+  entity_model:
+    pattern: docs/stories/{story_id}/entity-model.md
+    owner: db-designer
+
+  ui_design:
+    pattern: docs/stories/{story_id}/ui-design.md
+    owner: ui-designer
+    applies_to: [web]
+
+  design_review:
+    pattern: docs/stories/{story_id}/design-review.md
+    owner: design-reviewer
+
+  # --- Impact / Planning -----------------------------------------------------
+  impact_analysis:
+    pattern: docs/stories/{story_id}/impact-analysis.md
+    owner: impact-analyzer
+
+  implementation_plan:
+    pattern: docs/stories/{story_id}/implementation-plan.md
+    owner: implementation-planner
+
+  plan_review:
+    pattern: docs/stories/{story_id}/plan-review.md
+    owner: plan-reviewer
+
+  # --- Tests -----------------------------------------------------------------
+  test_strategy:
+    pattern: docs/stories/{story_id}/test-strategy.md
+    owner: test-writer
+
+  ac_test_matrix:
+    pattern: docs/stories/{story_id}/ac-test-matrix.md
+    owner: test-writer
+
+  test_generation_report:
+    pattern: docs/stories/{story_id}/test-generation-report.md
+    owner: test-writer
+
+  # --- Implementation --------------------------------------------------------
+  implementation_report:
+    pattern: docs/stories/{story_id}/implementation-report.md
+    owner_by_layer:
+      api: nest-implementor
+      web: next-implementor
+
+  implementation_verification:
+    pattern: docs/stories/{story_id}/implementation-verification.md
+    owner: implementation-verifier
+
+  security_review:
+    pattern: docs/stories/{story_id}/security-review.md
+    owner: security-reviewer
+
+  # --- Reconciliation --------------------------------------------------------
+  reconciliation:
+    pattern: docs/stories/{story_id}/reconciliation.md
+    owner: reconciliation-reviewer
+
+  traceability:
+    pattern: docs/stories/{story_id}/traceability.md
+    owner: reconciliation-reviewer
+
+  # --- PR / Delivery ---------------------------------------------------------
+  pr_summary:
+    pattern: docs/stories/{story_id}/pr-summary.md
+    owner: pr-preparer
+
+  delivery_summary:
+    pattern: docs/stories/{story_id}/delivery-summary.md
+    owner: story-orchestrator
+
+  # --- Cross-story harness artifacts ----------------------------------------
+  active_story:
+    pattern: docs/workflow/active-story.yaml
+    owner: story-orchestrator
+
+  workflow_state:
+    pattern: docs/workflow/workflow-state.yaml
+    owner: story-orchestrator
+
+  workflow_history:
+    pattern: docs/workflow/history.jsonl
+    owner: story-orchestrator
+
+  project_state:
+    pattern: docs/knowledge/project-state.md
+    owner: story-orchestrator
+
+# Example — everything for one story:
+#   docs/stories/US-03-02-api/
+#     story.md  clarification-report.md  open-decisions.md  spec.md  spec-review.md
+#     api-design.md  openapi.yaml  db-design.md  entity-model.md  design-review.md
+#     impact-analysis.md  implementation-plan.md  plan-review.md
+#     test-strategy.md  ac-test-matrix.md  test-generation-report.md
+#     implementation-report.md  implementation-verification.md  security-review.md
+#     reconciliation.md  traceability.md  pr-summary.md  delivery-summary.md

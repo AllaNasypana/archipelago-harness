@@ -1,0 +1,530 @@
+# =============================================================================
+# CANONICAL WORKFLOW + ROUTING DEFINITION — Archipelago
+# =============================================================================
+# The ONLY authoritative definition of the story-delivery workflow: stage
+# identifiers, order, owners, transitions, loop-back targets and human gates.
+# Adapted from ai/customer-portal/docs/workflow/stage-map.yaml (v1).
+#
+# Prose (stages.md, AGENTS.md, Skill "Position in Workflow" sections) explains
+# this file and MUST stay consistent with it. No other file may define stages
+# or routing.
+#
+# Artifact references are registry KEYS resolved through
+# docs/workflow/artifact-paths.yaml. Never put a path here.
+#
+# Result contract (docs/workflow/artifact-lifecycle.md):
+#   PASS             -> advance to `next`
+#   CHANGES_REQUIRED -> route to loop_back[<key>]; the key MUST exist here
+#   BLOCKED          -> hold at the current stage, surface blocking_issues
+#   NOT_APPLICABLE   -> only where `optional: true`; advance to `next`
+#
+# Only story-orchestrator records transitions (workflow-state.yaml +
+# history.jsonl). Stage Skills never mutate workflow state.
+# =============================================================================
+
+version: 1
+status: draft # becomes `active` once the stage Skills and artifact-paths.yaml exist
+workflow: story-delivery
+
+commands:
+  approve: '/so:approve'
+  reject: '/so:reject'
+  start: '/so:start <StoryId>'
+  next: '/so:next'
+  status: '/so:status'
+  archive: '/so:archive'
+  slice: '/so:slice <Epic>'
+  slice_approve: '/so:slice-approve <Epic>'
+
+# -----------------------------------------------------------------------------
+# Story layers. Every story has exactly one `layer` (front matter of the story).
+# -----------------------------------------------------------------------------
+layers:
+  api:
+    scope: >
+      apps/api (domain, use cases, Prisma `app` schema, REST endpoints, OpenAPI)
+      and the regenerated packages/api-client.
+  web:
+    scope: >
+      apps/web (pages, components, forms, hooks, BFF route handlers, `bff`
+      session schema, en/uk UI strings).
+
+# A web story consumes the contract of the api story it names in `depends_on`.
+# `depends_on: null` (pure UI / BFF plumbing) skips these inputs and checks.
+# Api stories never set `depends_on`; delivery follows the slice order.
+layer_dependencies:
+  web:
+    requires_story_layer: api
+    consumes_from_dependency: [openapi, api_design] # resolved from the api story, not from this story
+    start_when: 'dependency artifact `openapi` is APPROVED'
+    merge_when: 'dependency story is COMPLETED'
+    on_contract_gap: >
+      Do not loop into the api story. Emit BLOCKED with an Open Decision; a new
+      or reopened api story fixes the contract.
+
+# -----------------------------------------------------------------------------
+# Epic-level step that runs OUTSIDE the per-story loop.
+# -----------------------------------------------------------------------------
+pre_workflow:
+  STORY_SLICING:
+    type: automated_skill
+    skill: story-slicer
+    scope: epic
+    purpose: >
+      Cut an approved epic into small stories (one layer each) and write the
+      proposed list as a story_slice. A human approves the slice; BACKLOG_SYNC
+      then materializes each story.
+    inputs: [epic, brd, design_index]
+    outputs: [story_slice]
+    approval: human # /so:slice-approve -> story-orchestrator, then backlog-sync creates the stories
+    small_story_rules:
+      - one user-visible behavior or one cohesive API capability
+      - at most ~5 acceptance criteria, each independently testable
+      - one backend module or one web feature folder
+      - reviewable in one sitting (a few hundred changed lines, excluding generated code)
+      - traced to BRD FR/BR IDs and epic AC IDs
+    story_id_format: 'US-<epic>-<nn>-<layer>' # e.g. US-03-02-api, US-03-02-web
+
+# -----------------------------------------------------------------------------
+# Per-story stages, in order.
+# -----------------------------------------------------------------------------
+stage_order:
+  - BACKLOG_SYNC
+  - CLARIFICATION
+  - SPECIFICATION
+  - SPEC_REVIEW
+  - HUMAN_SPEC_APPROVAL
+  - API_DESIGN
+  - DB_DESIGN
+  - UI_DESIGN
+  - DESIGN_REVIEW
+  - IMPACT_ANALYSIS
+  - IMPLEMENTATION_PLANNING
+  - PLAN_REVIEW
+  - HUMAN_PLAN_APPROVAL
+  - TEST_WRITING
+  - IMPLEMENTATION
+  - IMPLEMENTATION_VERIFICATION
+  - SECURITY_REVIEW
+  - RECONCILIATION
+  - HUMAN_PR_APPROVAL
+  - PR_PREPARATION
+  - READY_FOR_PR
+  - COMPLETED
+  - ARCHIVED
+
+# Produced only when their design stage did not record NOT_APPLICABLE. A stage
+# listing one of these in `inputs` requires it unless that happened.
+conditional_artifacts:
+  - api_design
+  - openapi
+  - database_design
+  - entity_model
+  - ui_design
+
+stages:
+  BACKLOG_SYNC:
+    type: automated_skill
+    skill: backlog-sync
+    purpose: >
+      Import the active story from GitHub Issues when configured, otherwise from
+      the local docs/stories/ files written by STORY_SLICING.
+    inputs: [story_slice] # absent when the source is GitHub Issues
+    outputs: [story, story_catalog]
+    next: CLARIFICATION
+    run_policy: >
+      Not run on every `continue`. Runs when a slice is approved
+      (/so:slice-approve materializes its stories), on /so:start only if the
+      story file is missing, on an explicit sync request, or on a
+      RECONCILIATION story_source_conflict loop-back.
+
+  CLARIFICATION:
+    type: automated_skill
+    skill: us-clarifier
+    inputs: [story]
+    outputs: [clarification_report, open_decisions]
+    next: SPECIFICATION
+
+  SPECIFICATION:
+    type: automated_skill
+    skill: spec-writer
+    inputs: [story, clarification_report, open_decisions]
+    outputs: [specification]
+    next: SPEC_REVIEW
+    requirement: >
+      State the story layer and, for each area (API, DB `app`/`bff`, UI, i18n),
+      whether it changes. Design stages rely on this statement.
+
+  SPEC_REVIEW:
+    type: automated_skill
+    skill: spec-verifier
+    inputs: [story, specification, open_decisions]
+    outputs: [specification_review]
+    next: HUMAN_SPEC_APPROVAL
+    loop_back:
+      changes_required: SPECIFICATION
+
+  HUMAN_SPEC_APPROVAL:
+    type: human_gate
+    owner: human
+    required_artifacts: [specification, specification_review]
+    on_approve: API_DESIGN
+    on_reject: SPECIFICATION
+
+  API_DESIGN:
+    type: automated_skill
+    skill: openapi-designer
+    applies_to: [api]
+    inputs: [specification, specification_review, open_decisions]
+    outputs: [api_design, openapi]
+    next: DB_DESIGN
+    optional: true
+    optional_when: >
+      The story layer is `web`, or the approved Specification states that NestJS
+      endpoints, DTOs and error responses do not change.
+
+  DB_DESIGN:
+    type: automated_skill
+    skill: db-designer
+    applies_to: [api, web]
+    inputs: [specification, api_design, openapi, open_decisions]
+    outputs: [database_design, entity_model]
+    next: UI_DESIGN
+    optional: true
+    optional_when: >
+      The approved Specification states that neither the `app` schema (api
+      stories) nor the `bff` schema (web stories) changes.
+    constraint: 'One migration changes either `app` or `bff`, never both.'
+
+  UI_DESIGN:
+    type: automated_skill
+    skill: ui-designer
+    applies_to: [web]
+    inputs: [specification, specification_review, design_index, openapi, open_decisions]
+    outputs: [ui_design]
+    next: DESIGN_REVIEW
+    optional: true
+    optional_when: >
+      The story layer is `api`, or the approved Specification states there is no
+      user-visible change.
+    rules:
+      - app shell (header, sidebar, profile menu) only from the reference mockups (BRD D17)
+      - list mockup panels used and apply recorded corrections; use epic text where the design index says so
+      - reuse theme.css tokens and components.css classes; list any new ones
+      - list every new UI string key for en and uk
+      - cover loading, empty, error and success states; 360 px where BRD D9 requires it
+
+  DESIGN_REVIEW:
+    type: automated_skill
+    skill: design-reviewer
+    inputs:
+      [specification, api_design, openapi, database_design, entity_model, ui_design, open_decisions]
+    outputs: [design_review]
+    next: IMPACT_ANALYSIS
+    optional: true
+    optional_when: >
+      API_DESIGN, DB_DESIGN and UI_DESIGN all recorded NOT_APPLICABLE. Still
+      write a one-line design_review stating that.
+    loop_back:
+      changes_required_api: API_DESIGN
+      changes_required_database: DB_DESIGN
+      changes_required_ui: UI_DESIGN
+      changes_required_multiple: API_DESIGN
+
+  IMPACT_ANALYSIS:
+    type: automated_skill
+    skill: impact-analyzer
+    inputs:
+      [
+        story,
+        specification,
+        specification_review,
+        api_design,
+        openapi,
+        database_design,
+        entity_model,
+        ui_design,
+        design_review,
+        open_decisions,
+      ]
+    outputs: [impact_analysis]
+    next: IMPLEMENTATION_PLANNING
+    loop_back:
+      changes_required_specification: SPECIFICATION
+      changes_required_api: API_DESIGN
+      changes_required_database: DB_DESIGN
+      changes_required_ui: UI_DESIGN
+
+  IMPLEMENTATION_PLANNING:
+    type: automated_skill
+    skill: implementation-planner
+    inputs:
+      [
+        story,
+        open_decisions,
+        specification,
+        specification_review,
+        api_design,
+        openapi,
+        database_design,
+        entity_model,
+        ui_design,
+        design_review,
+        impact_analysis,
+      ]
+    outputs: [implementation_plan]
+    next: PLAN_REVIEW
+
+  PLAN_REVIEW:
+    type: automated_skill
+    skill: plan-reviewer
+    inputs:
+      [
+        story,
+        specification,
+        specification_review,
+        impact_analysis,
+        implementation_plan,
+        api_design,
+        openapi,
+        database_design,
+        entity_model,
+        ui_design,
+        open_decisions,
+      ]
+    outputs: [plan_review]
+    next: HUMAN_PLAN_APPROVAL
+    loop_back:
+      changes_required: IMPLEMENTATION_PLANNING
+    quality_bar: >
+      Reject plans that add layers, abstractions or options the story does not
+      need (AGENTS.md §5).
+
+  HUMAN_PLAN_APPROVAL:
+    type: human_gate
+    owner: human
+    required_artifacts: [implementation_plan, plan_review]
+    on_approve: TEST_WRITING
+    on_reject: IMPLEMENTATION_PLANNING
+
+  TEST_WRITING:
+    type: automated_skill
+    skill: test-writer
+    inputs:
+      [
+        story,
+        specification,
+        api_design,
+        openapi,
+        database_design,
+        ui_design,
+        impact_analysis,
+        implementation_plan,
+        plan_review,
+      ]
+    outputs: [test_strategy, ac_test_matrix, test_generation_report]
+    next: IMPLEMENTATION
+    tooling: 'Vitest in both apps; Testing Library in web (ADR-001)'
+    loop_back:
+      changes_required_tests: TEST_WRITING
+      invalid_specification: SPECIFICATION
+      invalid_api_design: API_DESIGN
+      invalid_database_design: DB_DESIGN
+      invalid_ui_design: UI_DESIGN
+
+  IMPLEMENTATION:
+    type: automated_skill
+    skill_by_layer:
+      api: nest-implementor
+      web: next-implementor
+    standards:
+      api: apps/api/AGENTS.md backend rules, AGENTS.md §5
+      web: apps/web/AGENTS.md web rules and "Web code principles", AGENTS.md §5
+    inputs:
+      [
+        story,
+        open_decisions,
+        specification,
+        specification_review,
+        impact_analysis,
+        implementation_plan,
+        plan_review,
+        api_design,
+        openapi,
+        database_design,
+        entity_model,
+        ui_design,
+        test_strategy,
+        ac_test_matrix,
+      ]
+    outputs: [implementation_report]
+    next: IMPLEMENTATION_VERIFICATION
+    loop_back:
+      partial: IMPLEMENTATION
+      blocked_by_plan: IMPLEMENTATION_PLANNING
+
+  IMPLEMENTATION_VERIFICATION:
+    type: automated_skill
+    skill: implementation-verifier
+    inputs:
+      [
+        story,
+        specification,
+        specification_review,
+        impact_analysis,
+        implementation_plan,
+        plan_review,
+        implementation_report,
+        api_design,
+        openapi,
+        database_design,
+        entity_model,
+        ui_design,
+        test_strategy,
+        ac_test_matrix,
+      ]
+    outputs: [implementation_verification]
+    next: SECURITY_REVIEW
+    commands:
+      - pnpm db:up
+      - pnpm --filter @archipelago/api prisma:generate
+      - pnpm turbo run lint typecheck test build
+      - pnpm --filter @archipelago/api test:e2e # api stories touching HTTP flows
+    quality_bar: 'Report readability problems as findings (AGENTS.md §5).'
+    loop_back:
+      changes_required: IMPLEMENTATION
+
+  SECURITY_REVIEW:
+    type: automated_skill
+    skill: security-reviewer
+    inputs:
+      [
+        story,
+        specification,
+        specification_review,
+        impact_analysis,
+        implementation_plan,
+        plan_review,
+        implementation_report,
+        implementation_verification,
+        api_design,
+        openapi,
+        database_design,
+        entity_model,
+        ui_design,
+        test_strategy,
+        ac_test_matrix,
+        open_decisions,
+      ]
+    outputs: [security_review]
+    next: RECONCILIATION
+    focus: >
+      BFF boundary and token isolation, session cookies (CSRF, fixation,
+      revocation), NestJS authorization on every resource, `app`/`bff` schema
+      isolation, secrets and logging (AGENTS.md §3, §7).
+    loop_back:
+      changes_required: IMPLEMENTATION
+      invalid_security_design: API_DESIGN
+
+  RECONCILIATION:
+    type: automated_skill
+    skill: reconciliation-reviewer
+    inputs:
+      [
+        story,
+        specification,
+        specification_review,
+        api_design,
+        openapi,
+        database_design,
+        entity_model,
+        ui_design,
+        design_review,
+        impact_analysis,
+        implementation_plan,
+        plan_review,
+        test_strategy,
+        ac_test_matrix,
+        test_generation_report,
+        implementation_report,
+        implementation_verification,
+        security_review,
+        open_decisions,
+      ]
+    outputs: [reconciliation, traceability]
+    next: HUMAN_PR_APPROVAL
+    traceability_to: [BRD FR/BR IDs, epic AC IDs, story AC IDs]
+    loop_back:
+      implementation_drift: IMPLEMENTATION
+      test_gap: TEST_WRITING
+      plan_gap: IMPLEMENTATION_PLANNING
+      design_gap: API_DESIGN
+      ui_gap: UI_DESIGN
+      specification_gap: SPECIFICATION
+      story_source_conflict: BACKLOG_SYNC
+
+  HUMAN_PR_APPROVAL:
+    type: human_gate
+    owner: human
+    required_artifacts: [implementation_verification, security_review, reconciliation, traceability]
+    on_approve: PR_PREPARATION
+    on_reject: RECONCILIATION
+
+  PR_PREPARATION:
+    type: automated_skill
+    skill: pr-preparer
+    inputs:
+      [
+        story,
+        specification,
+        impact_analysis,
+        implementation_plan,
+        implementation_report,
+        implementation_verification,
+        security_review,
+        reconciliation,
+        traceability,
+      ]
+    outputs: [pr_summary]
+    next: READY_FOR_PR
+    loop_back:
+      stale_reconciliation: RECONCILIATION
+
+  READY_FOR_PR:
+    type: human_gate
+    owner: human
+    required_artifacts: [pr_summary]
+    meaning: >
+      All harness checks passed. A human creates or finalizes the Pull Request
+      and records that it is open.
+    on_approve: COMPLETED
+    on_reject: PR_PREPARATION
+
+  COMPLETED:
+    type: human_gate
+    owner: human
+    required_artifacts: [pr_summary]
+    meaning: >
+      A human confirms the Pull Request was merged, or the delivery was
+      explicitly closed. Archive mode runs only from here. For a web story, its
+      api dependency must already be COMPLETED.
+    on_approve: ARCHIVED
+    on_reject: PR_PREPARATION
+
+  ARCHIVED:
+    type: terminal
+    owner: story-orchestrator
+    meaning: >
+      Knowledge consolidated and workflow state cleaned, reached only through
+      archive mode on explicit human request. Artifacts are not moved; catalog
+      status and artifact metadata separate history from active work.
+    produces: [delivery_summary]
+
+# Input rule: every `inputs` entry is always required, or listed in
+# conditional_artifacts (required unless its design stage was NOT_APPLICABLE).
+# `epic`, `brd` and `design_index` are project documents, and `story_slice` is
+# produced by pre_workflow; none of them is a per-story artifact.
+#
+# Loop-back rule: a Skill may name only a key under the current stage's
+# `loop_back`. An unknown key is rejected and the stage is held as BLOCKED
+# pending a human decision.

@@ -1,0 +1,8 @@
+{
+  "name": "@archipelago/config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json"
+  }
+}
