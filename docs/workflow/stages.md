@@ -8,7 +8,8 @@ The workflow delivers **one epic at a time**, as small stories, **one story at a
 is cut into stories once; each story then goes from clarification to human acceptance. Each
 automated stage is run by exactly one Skill and writes artifacts addressed by registry keys in
 [`artifact-paths.yaml`](artifact-paths.yaml). Only `story-orchestrator` records transitions;
-stage Skills never edit workflow state. A review `PASS` is never human approval.
+stage Skills never edit workflow state. A review `PASS` is never human approval. What every stage Skill
+does the same way (inputs, re-entry, output, result) is in [`stage-contract.md`](stage-contract.md).
 
 ## Sources every stage reads
 

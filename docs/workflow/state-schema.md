@@ -30,6 +30,7 @@ story: # null between stories
   risk: normal # normal | high
   depends_on: US-03-02-api # or null
   path: docs/stories/epic-03/US-03-02-web/story.md
+  base_commit: e9c4b12 # HEAD at /so:start; REVIEW diffs the story against it
   activated_at: 2026-11-11T10:00:00Z
 status: IN_PROGRESS # see Workflow status
 current_stage: PLANNING # epic_stages or story_stage_order id; null when nothing runs

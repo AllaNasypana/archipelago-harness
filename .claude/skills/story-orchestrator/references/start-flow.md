@@ -14,7 +14,8 @@ Activate one story. Runs no stage.
 ## Steps
 
 1. Read `layer`, `risk` and `depends_on` from the story front matter.
-2. Set `story: {id, layer, risk, depends_on, path, activated_at}`, `current_stage: CLARIFICATION`,
+2. Set `story: {id, layer, risk, depends_on, path, base_commit, activated_at}` (`base_commit` =
+   `git rev-parse --short HEAD`; uncommitted changes outside the story are reported as a warning), `current_stage: CLARIFICATION`,
    `previous_stage: null`, `attempt: 1`, `status: IN_PROGRESS`, other story fields empty.
 3. Set the story `ACTIVE` in `backlog.md`.
 4. Append `{"verdict":"ACTIVATED","from_stage":null,"to_stage":"CLARIFICATION","skill":null,...}`.

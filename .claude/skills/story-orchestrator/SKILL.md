@@ -24,6 +24,7 @@ does stage work: no slicing, clarification, specs, plans, tests, code or reviews
 | Statuses, verdicts, result envelope                         | `docs/workflow/artifact-lifecycle.md` |
 | Front matter, staleness                                     | `docs/workflow/artifact-schema.md`    |
 | State file, transition rules, history events                | `docs/workflow/state-schema.md`       |
+| What every stage Skill does the same way                    | `docs/workflow/stage-contract.md`     |
 | Project rules                                               | `AGENTS.md`                           |
 
 This Skill holds no stage list and no paths of its own. If it seems to disagree with those files,
