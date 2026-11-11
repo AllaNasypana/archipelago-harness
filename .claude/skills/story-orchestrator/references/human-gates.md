@@ -1,42 +1,50 @@
 # Human Gates — `/so:approve`, `/so:reject`
 
-Gates are the stages with `type: human_gate` in `stage-map.yaml`. No Skill runs at a gate; only a
+Gates are stages with `type: human_gate` in `stage-map.yaml`. No Skill runs at a gate; only a
 human command moves it.
 
 ## Entering a gate
 
-Build `pending_human_gate` (`state-schema.md`):
-
-- `stage`, `status: PENDING`, `requested_at` (runtime);
-- `required_artifacts` from `stage-map.yaml`, each resolved to `{type, path, version}`;
-- `automated_verdict` of the review that fed the gate.
-
-Set `status: WAITING_FOR_HUMAN` and report the artifacts to read (paths + versions), the
-automated verdict, open non-blocking findings count, and the two commands.
+1. **`required_when`.** If the gate has one and it does not hold (e.g. `HUMAN_PLAN_APPROVAL` with
+   `story.risk: normal`), do not stop: append `{"verdict":"SKIPPED",...}` and move to
+   `on_approve`.
+2. Otherwise build `pending_human_gate` (`state-schema.md`): `stage`, `status: PENDING`,
+   `required_artifacts` resolved to `{type, path, version}`, `automated_verdict` of the review that
+   fed it (or `null`), `requested_at`. Set `status: WAITING_FOR_HUMAN`.
+3. Report what to read (paths + versions), the automated verdict, non-blocking findings count,
+   and the commands, including `reject_targets` if the gate has them.
 
 ## `/so:approve [comment]`
 
-Refuse unless `current_stage` is a human gate and every required artifact exists, is current, and
-its review verdict was `PASS`.
+Refuse unless `current_stage` is a human gate and every required artifact exists and is current.
+At `HUMAN_SPEC_APPROVAL` and `HUMAN_ACCEPTANCE` also refuse unless the feeding review's verdict
+was `PASS`.
 
-1. `pending_human_gate`: `status: APPROVED`, `decided_at` (runtime), `decided_by`, `comment`.
-2. Set the gate's reviewed artifacts to `APPROVED` (e.g. `specification` at
-   `HUMAN_SPEC_APPROVAL`, `implementation_plan` at `HUMAN_PLAN_APPROVAL`).
-3. If the human resolved Open Decisions in the comment, record them in the history `note` and
-   tell the human that `us-clarifier` must publish them in a new `open_decisions` version before
-   the next stage consumes it.
-4. Append `{"verdict":"HUMAN_APPROVED","skill":null,...}`.
-5. Move to `on_approve`; clear `pending_human_gate`; status `IN_PROGRESS`, or `COMPLETED` /
-   `ARCHIVED` when entering those stages.
-6. At `COMPLETED` for a `web` story, refuse if its `depends_on` story is not `COMPLETED`.
+1. `pending_human_gate`: `status: APPROVED`, `decided_at`, `decided_by`, `comment`.
+2. Set the gate's `required_artifacts` to `APPROVED`.
+3. Append `{"verdict":"HUMAN_APPROVED","skill":null,"note":"<comment>",...}`.
+4. Clear `pending_human_gate` and move to `on_approve`:
+   - `HUMAN_BACKLOG_APPROVAL` → effects in `epic-flow.md`.
+   - `HUMAN_ACCEPTANCE` → `DONE`: set every story artifact `APPROVED`, the story `DONE` in
+     `backlog.md`, append `DONE`, reset the story (`state-schema.md` rule 7), check epic done
+     (`epic-flow.md`), and list the next `READY` stories — especially a web story this api story
+     unblocked.
+   - otherwise `status: IN_PROGRESS`.
 
-## `/so:reject <reason>`
+A comment that decides a product question is not applied by you: tell the human it will be
+recorded at the next `CLARIFICATION`, or reject to `CLARIFICATION` now.
 
-The reason is required. Refuse unless `current_stage` is a human gate.
+## `/so:reject [TARGET] <comment>`
 
-1. `pending_human_gate`: `status: REJECTED`, `decided_at`, `decided_by`, `comment: <reason>`.
-2. Append `{"verdict":"HUMAN_REJECTED","skill":null,"note":"<reason>",...}`.
-3. Move to `on_reject`; clear `pending_human_gate`; `status: IN_PROGRESS`.
+The comment is required. Refuse unless `current_stage` is a human gate.
 
-Both commands invoke no stage Skill and never create, push or merge a PR. Finish with the
-Orchestration Result, including the target stage and the next command.
+1. If the first word is a stage ID, it must be in the gate's `reject_targets`; otherwise refuse
+   and list them. No stage ID → `on_reject`.
+2. `pending_human_gate`: `status: REJECTED`, `decided_at`, `decided_by`, `comment`.
+3. Append `{"verdict":"HUMAN_REJECTED","skill":null,"note":"<comment>",...}`.
+4. Clear `pending_human_gate`, move to the target, `status: IN_PROGRESS`. The target's owner gets
+   the comment on the next `/so:next` and revises its artifact in place (`version + 1`, `DRAFT`),
+   so every later gate is passed again.
+
+Both commands invoke no stage Skill and never touch Git. Finish with the Orchestration Result,
+including the target stage and the next command.

@@ -58,7 +58,7 @@ boundary: an external identity provider now takes part in sign-in. AGENTS.md req
 
    Secrets live only in environment configuration, never in the repository.
 
-## Options left open (decide in US-01-11-api CLARIFICATION / API_DESIGN)
+## Options left open (decide in US-01-11-api CLARIFICATION / SPECIFICATION)
 
 - **OIDC library:** `openid-client` in NestJS (full OIDC including discovery and JWKS), or
   `google-auth-library` (`OAuth2Client.getToken` + `verifyIdToken`). `openid-client` is

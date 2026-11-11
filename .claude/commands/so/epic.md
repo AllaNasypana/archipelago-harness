@@ -1,0 +1,9 @@
+---
+description: Activate an epic and cut it into small api/web stories (BACKLOG_SYNC).
+argument-hint: <Epic, e.g. EPIC-03>
+---
+
+Use the story-orchestrator Skill in `epic` mode (`references/epic-flow.md`) for: $ARGUMENTS
+
+Never replace an epic that is not DONE. Run at most the BACKLOG_SYNC stage, then stop at
+HUMAN_BACKLOG_APPROVAL. Finish with the Orchestration Result.

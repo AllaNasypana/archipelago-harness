@@ -116,7 +116,7 @@ Commands (repository root; Turborepo runs them per package, `--filter <package>`
 
 ## 8. Agent Workflow & Definition of Done
 
-**Story delivery harness.** Feature work goes through the workflow in `docs/workflow/`: `stage-map.yaml` (stages, routing, gates — normative), `artifact-paths.yaml` (where artifacts live, who owns them), `artifact-lifecycle.md`, `artifact-schema.md`, `state-schema.md`; `stages.md` explains them. Skills live in `.claude/skills/`, commands in `.claude/commands/so/` (`/so:slice`, `/so:slice-approve`, `/so:start`, `/so:next`, `/so:status`, `/so:approve`, `/so:reject`, `/so:archive`). Only `story-orchestrator` writes workflow state; a review `PASS` is never human approval.
+**Delivery harness.** Feature work goes through the workflow in `docs/workflow/`: `stage-map.yaml` (stages, routing, gates — normative), `artifact-paths.yaml` (where artifacts live, who writes them), `artifact-lifecycle.md`, `artifact-schema.md`, `state-schema.md`; `stages.md` explains them. One epic at a time is cut into small single-layer (`api` or `web`) stories under `docs/stories/epic-<nn>/`; one story at a time goes from an interactive clarification to human acceptance. Skills live in `.claude/skills/`, commands in `.claude/commands/so/` (`/so:epic`, `/so:start`, `/so:next`, `/so:status`, `/so:approve`, `/so:reject`). Only `story-orchestrator` writes workflow state; a review `PASS` is never human approval.
 
 1. Before making changes, read relevant `AGENTS.md` files, ADRs, task acceptance criteria, and existing implementations.
 2. If a decision is unapproved or requirements conflict, present options and request approval; do not invent architectural decisions.

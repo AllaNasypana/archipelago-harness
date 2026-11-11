@@ -1,23 +1,29 @@
 # Continue Flow — `/so:next`
 
-Advance the active story by **at most one** stage.
+Advance by **at most one** stage.
 
-1. **Resolve the story.** Read `active-story.yaml` and `workflow-state.yaml`. No active story →
-   stop with "run /so:start <StoryId>". Mismatch → `INCONSISTENT`, stop.
-2. **Resolve the stage.** `current_stage` must be in `stage_order`, else `INCONSISTENT`.
-   `status: NOT_STARTED` becomes `IN_PROGRESS` with this step.
-3. **Human gate?** (`type: human_gate`) Invoke nothing. If `pending_human_gate` is empty, build it
-   (`human-gates.md`), set `WAITING_FOR_HUMAN`, report, stop. If it is `PENDING`, re-report and stop.
-4. **Layer check.** If `applies_to` excludes the story layer, record `NOT_APPLICABLE` (no Skill,
-   no artifact), advance, append history, stop.
-5. **Invariants.** Check the list in SKILL.md. On failure hold and report.
-6. **Reuse.** If the stage already has a current, valid output, reuse its verdict (go to 8).
-7. **Invoke one Skill** (`skill`, or `skill_by_layer[layer]`) with story ID, layer, stage and
-   resolved input paths. `BACKLOG_SYNC` follows its `run_policy`: never on a routine `continue`.
-8. **Apply the envelope** (SKILL.md table). Inspect the produced files at their registry paths.
-9. **Record** the transition in `workflow-state.yaml` and append one history event. Stop.
+1. **Resolve state.** Read `workflow-state.yaml`.
+   - No epic → stop: "run /so:epic <Epic>".
+   - Epic `IN_DELIVERY`, no story → stop: list `READY` stories, recommend `/so:start <StoryId>`.
+   - Inconsistent state (SKILL.md invariants) → `BLOCKED`, stop.
+2. **Human gate?** Invoke nothing. If `pending_human_gate` is empty, enter the gate
+   (`human-gates.md`); if `PENDING`, re-report it. Stop.
+3. **BLOCKED?** Re-check the reported blocking issues. Still present → re-report and stop. Gone
+   (e.g. an ADR was accepted, a decision resolved) → set `IN_PROGRESS` and continue.
+4. **Invariants** (SKILL.md). On failure hold and report.
+5. **Reuse** a current output if one exists (SKILL.md Idempotency), then go to 7 — never after
+   a loop-back or rejection into this stage. A finished `CLARIFICATION` is recorded this way.
+6. **Invoke** one Skill as SKILL.md "Routing a stage" says:
+   - `BACKLOG_SYNC` after a rejection: mode `revise` with the gate's comment as feedback.
+   - `CLARIFICATION`: interactive. Refuse in Auto Mode. On a resume, the Skill continues from
+     `clarification.md`.
+   - Any stage re-entered by a loop-back or rejection: pass the loop-back key or the human's
+     comment so the owner knows what to fix.
+7. **Apply the envelope** (SKILL.md). Inspect the produced files at their registry paths.
+8. **Record** the transition and append history. If the next stage is a gate, enter it
+   (`human-gates.md`). Stop.
 
 ## Result
 
-The Orchestration Result block from SKILL.md. The next command is normally `/so:next`, or
-`/so:approve` / `/so:reject <reason>` at a gate.
+The Orchestration Result. The next command is `/so:next`, or `/so:approve` / `/so:reject` at a
+gate.

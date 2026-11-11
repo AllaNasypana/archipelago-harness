@@ -1,99 +1,105 @@
 # Status Vocabularies
 
-The single source of status values used by the harness. There are four separate enums; they
-answer different questions and must never be mixed.
+The single source of status values used by the harness. Each enum answers a different question;
+never mix them.
 
-| Enum                      | Question it answers                   | Where it is stored                                            |
-| ------------------------- | ------------------------------------- | ------------------------------------------------------------- |
-| Artifact lifecycle status | Is this document current?             | `status:` in the artifact front matter (`artifact-schema.md`) |
-| Review verdict            | What did this automated stage decide? | `verdict` in the stage result envelope (§2)                   |
-| Workflow status           | What state is the delivery in?        | `status:` in `workflow-state.yaml`                            |
-| Story status              | Where is the story in the backlog?    | `status:` per story in `docs/stories/catalog.yaml`            |
+| Enum            | Question it answers                     | Stored in                               |
+| --------------- | --------------------------------------- | --------------------------------------- |
+| Artifact status | Is this document agreed?                | `status:` in artifact front matter      |
+| Stage verdict   | What did this automated stage decide?   | `verdict` in the result envelope (§2)   |
+| Workflow status | Can the workflow move right now?        | `status:` in `workflow-state.yaml`      |
+| Epic status     | Where is the active epic?               | `epic.status:` in `workflow-state.yaml` |
+| Story status    | Where is a story in its epic's backlog? | Status column of `backlog.md`           |
 
 ---
 
-## 1. Artifact lifecycle status
+## 1. Artifact status
 
-| Value        | Meaning                                                                 |
-| ------------ | ----------------------------------------------------------------------- |
-| `DRAFT`      | Written by its owner Skill; not reviewed yet.                           |
-| `IN_REVIEW`  | A downstream review stage is evaluating it.                             |
-| `APPROVED`   | Passed its review (and human gate where there is one). Safe to consume. |
-| `SUPERSEDED` | A newer version exists; never used as a current input.                  |
-| `ARCHIVED`   | Belongs to an archived delivery; kept for history only.                 |
+| Value      | Meaning                                                                    |
+| ---------- | -------------------------------------------------------------------------- |
+| `DRAFT`    | Written or revised by its owner; no human has accepted this version yet.   |
+| `APPROVED` | A human accepted this version (a gate, or the CLARIFICATION confirmation). |
 
 Rules:
 
-- A revision increments `version` and sets `supersedes`; the previous file becomes `SUPERSEDED`.
-- Reviewers check that every input they read is current (not `SUPERSEDED`/`ARCHIVED`) and that
-  the versions recorded downstream match. A stale input blocks progression until the dependent
-  stage re-runs.
-- Status changes after a review or human gate are recorded by `story-orchestrator`; a Skill never
-  edits the status of an artifact it does not own.
-- Open Decisions resolved at a human gate are written into a new version of `open_decisions` by
-  its owner (`us-clarifier`) before the next stage consumes them — the resolution must live in the
-  artifact, not only in `history.jsonl`.
+- An artifact is revised in place: its owner increments `version` and resets `status: DRAFT`.
+  Git keeps the old text; there are no superseded copies.
+- On `/so:approve` the orchestrator sets the gate's `required_artifacts` to `APPROVED`; on `DONE`
+  it sets every artifact of the story to `APPROVED`. `story-clarifier` sets `clarification` to
+  `APPROVED` itself, because the human confirms inside the stage.
+- A Skill never changes the status of an artifact it does not own (except the orchestrator as
+  above).
+- **Staleness:** each artifact lists the versions it read (`artifact-schema.md`). If an input is
+  now at a higher version, the artifact is stale: the consuming stage returns `BLOCKED` and names
+  the stage to re-run. A loop-back that revises an approved artifact therefore sends the story
+  through that artifact's gate again — routing in `stage-map.yaml` already does this.
 
 ---
 
-## 2. Review verdict and the result envelope
+## 2. Stage verdict and the result envelope
 
-Every automated stage returns one result envelope to the orchestrator:
+Every automated or interactive stage returns one result envelope to the orchestrator:
 
 ```yaml
 stage: SPEC_REVIEW
-skill: spec-verifier
-verdict: PASS # PASS | CHANGES_REQUIRED | BLOCKED | NOT_APPLICABLE
-loop_back_key: null # a key under this stage's `loop_back` in stage-map.yaml, only with CHANGES_REQUIRED
+skill: spec-reviewer
+verdict: PASS # PASS | CHANGES_REQUIRED | BLOCKED
+loop_back_key: null # a key under this stage's `loop_back`, only with CHANGES_REQUIRED
 artifacts: # what this run wrote
-  - { type: specification_review, path: docs/stories/US-03-02-api/spec-review.md, version: 1 }
+  - {
+      type: specification_review,
+      path: docs/stories/epic-03/US-03-02-api/spec-review.md,
+      version: 1,
+    }
 blocking_issues: [] # non-empty only with BLOCKED or CHANGES_REQUIRED
-non_blocking_findings: 0 # count; the findings themselves stay in the artifact
+non_blocking_findings: 0 # count; the findings stay in the artifact
 summary: One or two sentences for the human.
 ```
 
-| Value              | Meaning                                                                                         | Orchestrator action                     |
-| ------------------ | ----------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `PASS`             | Stage goal met; no blocking findings (non-blocking ones may exist).                             | Advance to `next`.                      |
-| `CHANGES_REQUIRED` | Correctable problem; `loop_back_key` names a key under this stage's `loop_back`.                | Route to the loop-back target.          |
-| `BLOCKED`          | Cannot be evaluated: missing or stale input, unresolved blocking decision, environment failure. | Hold the stage; show `blocking_issues`. |
-| `NOT_APPLICABLE`   | Only for `optional: true` stages whose condition is met; the reason is in the artifact.         | Advance to `next`.                      |
+| Value              | Meaning                                                                                                                           | Orchestrator action                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `PASS`             | Stage goal met; non-blocking findings may exist.                                                                                  | Advance to `next`.                      |
+| `CHANGES_REQUIRED` | Correctable problem upstream; `loop_back_key` names a key under this stage's `loop_back`.                                         | Route to the loop-back target.          |
+| `BLOCKED`          | Cannot proceed: missing or stale input, open blocking decision, environment failure, or no human confirmation at `CLARIFICATION`. | Hold the stage; show `blocking_issues`. |
 
-`READY_FOR_PR`, `COMPLETED` and `ARCHIVED` are **stages**, not verdicts. Verdict names from
-older harnesses (`APPROVED`, `REJECTED`, `FAILED`, `PROCEED_TO_*`, `RETURN_TO_*`, …) are not used.
+`CLARIFICATION` returns its envelope only when the interview ends. An interrupted interview
+returns nothing: the state stays `IN_PROGRESS` and the next `/so:next` resumes from
+`clarification.md`.
+
+Human gates and `DONE` are **stages**, not verdicts. The history markers (`HUMAN_APPROVED`,
+`SKIPPED`, …) are listed in `state-schema.md`.
 
 ---
 
 ## 3. Workflow status
 
-Stored in `workflow-state.yaml`.
-
-| Value               | Meaning                                                                  |
-| ------------------- | ------------------------------------------------------------------------ |
-| `IDLE`              | No story is active.                                                      |
-| `NOT_STARTED`       | A story was activated; no stage has run yet.                             |
-| `IN_PROGRESS`       | The current stage is automated and runnable.                             |
-| `WAITING_FOR_HUMAN` | The current stage is a human gate; `pending_human_gate.status: PENDING`. |
-| `BLOCKED`           | The last stage returned `BLOCKED`, or a workflow invariant failed.       |
-| `COMPLETED`         | Stage `COMPLETED` reached: the PR is merged or the delivery was closed.  |
-| `ARCHIVED`          | Stage `ARCHIVED` reached through archive mode.                           |
+| Value               | Meaning                                                               |
+| ------------------- | --------------------------------------------------------------------- |
+| `IDLE`              | Nothing runs: no epic, or an epic `IN_DELIVERY` with no active story. |
+| `IN_PROGRESS`       | The current stage is runnable (or resumable) by `/so:next`.           |
+| `WAITING_FOR_HUMAN` | The current stage is a human gate; `pending_human_gate` is `PENDING`. |
+| `BLOCKED`           | The last stage returned `BLOCKED`, or a workflow invariant failed.    |
 
 `pending_human_gate.status`: `PENDING`, `APPROVED`, `REJECTED`.
 
 ---
 
-## 4. Story status
+## 4. Epic status
 
-Stored per story in `docs/stories/catalog.yaml` (and as `PROPOSED` rows in a `story_slice`).
+| Value         | Meaning                                                                 |
+| ------------- | ----------------------------------------------------------------------- |
+| `BACKLOG`     | `BACKLOG_SYNC` or `HUMAN_BACKLOG_APPROVAL` is the current stage.        |
+| `IN_DELIVERY` | Backlog approved; stories are activated one at a time with `/so:start`. |
+| `DONE`        | Every story in the backlog is `DONE` or `DROPPED`.                      |
 
-| Value       | Meaning                                                                            |
-| ----------- | ---------------------------------------------------------------------------------- |
-| `PROPOSED`  | Listed in a story slice that a human has not approved yet.                         |
-| `READY`     | Slice approved and `story.md` created; may be activated (dependencies permitting). |
-| `ACTIVE`    | The story currently in the workflow (exactly one at a time).                       |
-| `COMPLETED` | Its PR is merged.                                                                  |
-| `ARCHIVED`  | Archive mode finished.                                                             |
-| `DROPPED`   | Removed from scope by a human; kept for history.                                   |
+---
 
-A `web` story becomes activatable only when its `depends_on` api story has an `APPROVED`
-`openapi` artifact (`stage-map.yaml` `layer_dependencies`).
+## 5. Story status
+
+| Value      | Meaning                                                                       |
+| ---------- | ----------------------------------------------------------------------------- |
+| `PROPOSED` | Written by `BACKLOG_SYNC`; the backlog is not approved yet.                   |
+| `READY`    | Backlog approved; may be started once its `depends_on` story is `DONE`.       |
+| `ACTIVE`   | The story in the workflow now (at most one).                                  |
+| `DONE`     | Accepted at `HUMAN_ACCEPTANCE`.                                               |
+| `DROPPED`  | Removed from scope by a human; kept for history with the reason in `backlog`. |
