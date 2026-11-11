@@ -28,7 +28,8 @@ Handled by `/so:approve` (`human-gates.md`), with these effects:
 
 - `backlog.md` and every story it lists with `PROPOSED` → backlog `status: APPROVED`, those
   stories `READY` in the Status column.
-- `epic.status: IN_DELIVERY`, `current_stage: null`, `status: IDLE`. Append `BACKLOG_APPROVED`.
+- `epic.status: IN_DELIVERY`, `current_stage: null`, `status: IDLE`. The approval is one history
+  event with verdict `BACKLOG_APPROVED` (instead of `HUMAN_APPROVED`).
 - Recommend the first story: the earliest `READY` story in table order whose `depends_on` is
   `DONE` or empty.
 

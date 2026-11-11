@@ -92,7 +92,8 @@ story.
 
 - `workflow-state.yaml` is internally consistent: a story implies an epic `IN_DELIVERY`; a gate
   stage implies `pending_human_gate`; `current_stage` exists in `stage-map.yaml`.
-- Inputs exist and none is stale (`artifact-schema.md`).
+- Inputs exist and none is stale (`artifact-lifecycle.md` §1); a `DONE` dependency's artifacts
+  are frozen and only need to exist `APPROVED`.
 - Story stages: no `OPEN` entry in `decisions.md` lists this story under **Affects**, except at
   `CLARIFICATION`, which resolves them.
 - No `TODO`/`TBD`/`FIXME`/`???` in an `APPROVED` input.
@@ -109,8 +110,13 @@ for a review, `PASS` for any other output. Revisions are in place: the owner bum
 resets `status: DRAFT`.
 
 **Never reuse** when the stage was re-entered by a loop-back or a rejection (the last history
-event is `CHANGES_REQUIRED` or `HUMAN_REJECTED` with this stage as `to_stage`): the inputs did not
-change, but the owner must act on the key or the comment. Run the Skill and pass them.
+event is `CHANGES_REQUIRED` or `HUMAN_REJECTED` with this stage as `to_stage`) and the owner has
+not acted on it yet: the inputs did not change, but the owner must act on the key or the comment.
+Run the Skill and pass them.
+
+For an `interactive_skill`, the owner has acted when its output is finished (`clarification.md`
+with `interview: done`, `status: APPROVED`) and its `updated_at` is later than that re-entry
+event: record `PASS` by reuse.
 
 ## Recording
 

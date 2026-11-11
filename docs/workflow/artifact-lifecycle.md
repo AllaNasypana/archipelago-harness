@@ -30,9 +30,14 @@ Rules:
 - A Skill never changes the status of an artifact it does not own (except the orchestrator as
   above).
 - **Staleness:** each artifact lists the versions it read (`artifact-schema.md`). If an input is
-  now at a higher version, the artifact is stale: the consuming stage returns `BLOCKED` and names
-  the stage to re-run. A loop-back that revises an approved artifact therefore sends the story
-  through that artifact's gate again — routing in `stage-map.yaml` already does this.
+  now at a higher version, the artifact is stale. Its owner re-runs and revises it; any other
+  stage that consumes it returns `BLOCKED` and names the owner's stage to re-run. A loop-back
+  that revises an approved artifact therefore sends the story through that artifact's gate
+  again — routing in `stage-map.yaml` already does this.
+- **Frozen dependencies:** an artifact of a story that is `DONE` (e.g. `dependency_spec`) is
+  frozen. A consumer checks only that it exists and is `APPROVED`, never its own inputs: later
+  epic decisions do not make it stale. A new decision that contradicts it is an api contract gap
+  (`stage-map.yaml` → `web_depends_on_api`), not staleness.
 
 ---
 

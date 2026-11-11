@@ -11,9 +11,10 @@ from `artifact-paths.yaml`; never hard-code them.
 
 ## Before working
 
-1. Read every input. Check the front matter of each workflow artifact you read; if one you depend
-   on is missing, or an artifact you are revising lists an input that is now at a higher version,
-   return `BLOCKED` naming it.
+1. Read every input. Check the front matter of each workflow artifact you read. Return `BLOCKED`
+   naming it if an input is missing, or an **input** is itself stale (it lists an input now at a
+   higher version, `artifact-lifecycle.md` §1). Your **own** artifact being stale is not a block:
+   it is the reason you run — revise it and record the current input versions.
 2. Read the rules for the layer: `AGENTS.md`, `apps/api/AGENTS.md` or `apps/web/AGENTS.md`, and
    for web `apps/web/docs/web-patterns.md`. Only `Accepted` ADRs bind.
 3. Re-entered? Fix exactly what the key or comment names, revise in place (`version + 1`,

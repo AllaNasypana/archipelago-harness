@@ -88,7 +88,8 @@ epic_stages:
 
   HUMAN_BACKLOG_APPROVAL:
     type: human_gate
-    required_artifacts: [backlog, story]
+    required_artifacts: [backlog] # gets status APPROVED
+    also_review: [story, epic_decisions] # read via backlog links; story status = backlog Status column
     on_approve: null # epic is IN_DELIVERY; stories become READY
     on_reject: BACKLOG_SYNC # the comment is the feedback for the next version
 

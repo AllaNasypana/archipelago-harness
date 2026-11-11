@@ -17,12 +17,16 @@ human command moves it.
 ## `/so:approve [comment]`
 
 Refuse unless `current_stage` is a human gate and every required artifact exists and is current.
+For `HUMAN_BACKLOG_APPROVAL` also check that every story `backlog.md` lists has its `story.md`.
 At `HUMAN_SPEC_APPROVAL` and `HUMAN_ACCEPTANCE` also refuse unless the feeding review's verdict
 was `PASS`.
 
 1. `pending_human_gate`: `status: APPROVED`, `decided_at`, `decided_by`, `comment`.
-2. Set the gate's `required_artifacts` to `APPROVED`.
-3. Append `{"verdict":"HUMAN_APPROVED","skill":null,"note":"<comment>",...}`.
+2. Set the gate's `required_artifacts` to `APPROVED`. Artifacts without a `status` field
+   (`story`, `epic_decisions`) are never written: a story's status lives in the `backlog.md`
+   Status column (`HUMAN_BACKLOG_APPROVAL` → `READY`, see `epic-flow.md`).
+3. Append `{"verdict":"HUMAN_APPROVED","skill":null,"note":"<comment>",...}` (`BACKLOG_APPROVED` at
+   `HUMAN_BACKLOG_APPROVAL`; one event either way).
 4. Clear `pending_human_gate` and move to `on_approve`:
    - `HUMAN_BACKLOG_APPROVAL` → effects in `epic-flow.md`.
    - `HUMAN_ACCEPTANCE` → `DONE`: set every story artifact `APPROVED`, the story `DONE` in

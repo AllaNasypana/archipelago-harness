@@ -45,9 +45,14 @@ Resolve paths from `docs/workflow/artifact-paths.yaml`; the orchestrator passes 
 2. **Web story with `depends_on`:** the api story's decisions, error responses and validation
    rules are inherited. Record them as `answered-from-repo` (source: the api `spec.md`); never
    ask them again. A gap in that contract is not yours to fill: note it, and it becomes a
-   `BLOCKED` result (a new or reopened api story fixes it).
+   `BLOCKED` result (a new or reopened api story fixes it). A new epic decision that would
+   contradict the api story's spec is not recorded as settled: it is an api contract gap →
+   `BLOCKED`.
 3. If `clarification.md` exists, this is a **resume**: keep answered questions settled and go on
    with open ones. Re-ask a settled one only if new information contradicts it.
+   On a re-entry (the orchestrator passes a loop-back key or a rejection comment), set
+   `interview: in-progress` and `status: DRAFT`, bump `version`, add the comment as a new open
+   question, and close again as in step 5.
 
 ### 2. Write the skeleton first
 
