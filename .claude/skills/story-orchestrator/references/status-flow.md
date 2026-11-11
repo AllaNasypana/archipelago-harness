@@ -16,7 +16,8 @@
 - The recommended next command.
 
 When no story is active: list `READY` stories in backlog order, marking web stories whose api
-dependency is not `DONE`, and recommend the first startable one.
+dependency is not `DONE` and stories with an unfinished earlier story, warn about uncommitted
+changes in `apps/` or `packages/`, and recommend the first startable one.
 
 `INCONSISTENT` when: the state file contradicts itself or the files on disk; `current_stage` is
 not in `stage-map.yaml`; the backlog marks a story `ACTIVE` that the state does not name (or the

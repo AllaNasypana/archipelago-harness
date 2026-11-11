@@ -93,9 +93,9 @@ Human gates and `DONE` are **stages**, not verdicts. The history markers (`HUMAN
 
 | Value         | Meaning                                                                 |
 | ------------- | ----------------------------------------------------------------------- |
-| `BACKLOG`     | `BACKLOG_SYNC` or `HUMAN_BACKLOG_APPROVAL` is the current stage.        |
+| `BACKLOG`     | `BACKLOG_SYNC` or `HUMAN_BACKLOG_APPROVAL` is current (also an amend).  |
 | `IN_DELIVERY` | Backlog approved; stories are activated one at a time with `/so:start`. |
-| `DONE`        | Every story in the backlog is `DONE` or `DROPPED`.                      |
+| `DONE`        | Every story is `DONE` or `DROPPED`; an amend can reopen it.             |
 
 ---
 
@@ -104,7 +104,7 @@ Human gates and `DONE` are **stages**, not verdicts. The history markers (`HUMAN
 | Value      | Meaning                                                                       |
 | ---------- | ----------------------------------------------------------------------------- |
 | `PROPOSED` | Written by `BACKLOG_SYNC`; the backlog is not approved yet.                   |
-| `READY`    | Backlog approved; may be started once its `depends_on` story is `DONE`.       |
+| `READY`    | Backlog approved (or the story was parked); startable per `start-flow.md`.    |
 | `ACTIVE`   | The story in the workflow now (at most one).                                  |
 | `DONE`     | Accepted at `HUMAN_ACCEPTANCE`.                                               |
 | `DROPPED`  | Removed from scope by a human; kept for history with the reason in `backlog`. |

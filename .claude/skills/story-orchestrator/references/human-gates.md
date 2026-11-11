@@ -11,7 +11,8 @@ human command moves it.
 2. Otherwise build `pending_human_gate` (`state-schema.md`): `stage`, `status: PENDING`,
    `required_artifacts` resolved to `{type, path, version}`, `automated_verdict` of the review that
    fed it (or `null`), `requested_at`. Set `status: WAITING_FOR_HUMAN`.
-3. Report what to read (paths + versions), the automated verdict, non-blocking findings count,
+3. Report what to read (paths + versions, plus the gate's `also_review`), the automated verdict,
+   non-blocking findings count,
    and the commands, including `reject_targets` if the gate has them.
 
 ## `/so:approve [comment]`

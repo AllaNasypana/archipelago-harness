@@ -5,5 +5,6 @@ argument-hint: <Epic, e.g. EPIC-03>
 
 Use the story-orchestrator Skill in `epic` mode (`references/epic-flow.md`) for: $ARGUMENTS
 
-Never replace an epic that is not DONE. Run at most the BACKLOG_SYNC stage, then stop at
+Never replace an epic that is not DONE. With feedback on an approved backlog, amend it (park a
+BLOCKED active story first). Run at most the BACKLOG_SYNC stage, then stop at
 HUMAN_BACKLOG_APPROVAL. Finish with the Orchestration Result.

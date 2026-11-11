@@ -37,7 +37,8 @@ relevant guide in `node_modules/next/dist/docs/` before using an API you are uns
 6. Every UI string from the `en`/`uk` message files; add both keys.
 7. All UI states from the spec; keyboard path, labels and visible focus.
 8. Remove every stub listed in `tests.md`. Never weaken a test to make it pass; a wrong test →
-   `CHANGES_REQUIRED` + `plan_gap`.
+   `CHANGES_REQUIRED` + `plan_gap`. Never edit a test file listed in `tests.md`: REVIEW
+   compares their SHA-256.
 9. Finish with `pnpm --filter @archipelago/web lint typecheck test`.
 
 A web story never changes NestJS code or the api contract; a contract gap → `BLOCKED`.

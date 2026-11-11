@@ -10,12 +10,19 @@ Activate one story. Runs no stage.
   counts when this backlog lists it), and its `story.md` exists.
 - `web` story with `depends_on`: that story is `DONE` in whichever backlog lists it. Otherwise
   stop and name the api story to deliver first.
+- Delivery order: every story above it in the backlog table is `DONE` or `DROPPED` (this is
+  how foundation stories come first). Otherwise list them and ask the human to confirm starting
+  out of order (never in Auto Mode); record the confirmation in the `ACTIVATED` event's `note`.
+- Clean code tree: `git status --porcelain -- apps packages` is empty, so `base_commit` diffs
+  only this story. Otherwise stop: the human commits or stashes that work first (how accepted
+  work reaches Git is OQ-8).
 
 ## Steps
 
-1. Read `layer`, `risk` and `depends_on` from the story front matter.
+1. Read `layer` and `depends_on` from the story front matter, and `risk` from the backlog Risk
+   column (it may have been raised after slicing).
 2. Set `story: {id, layer, risk, depends_on, path, base_commit, activated_at}` (`base_commit` =
-   `git rev-parse --short HEAD`; uncommitted changes outside the story are reported as a warning), `current_stage: CLARIFICATION`,
+   `git rev-parse --short HEAD`), `current_stage: CLARIFICATION`,
    `previous_stage: null`, `attempt: 1`, `status: IN_PROGRESS`, other story fields empty.
 3. Set the story `ACTIVE` in `backlog.md`.
 4. Append `{"verdict":"ACTIVATED","from_stage":null,"to_stage":"CLARIFICATION","skill":null,...}`.

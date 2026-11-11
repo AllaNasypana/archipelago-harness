@@ -72,9 +72,11 @@ pending_human_gate:
 
 1. Only `story-orchestrator` changes this file, after a stage result or a human command, and
    appends exactly one event to `history.jsonl` per change.
-2. `/so:epic` needs no active epic, or one that is `DONE`. `/so:start` needs an epic
+2. `/so:epic` needs no active epic, or one that is `DONE`; with feedback it amends the active
+   epic's (or a `DONE` epic's) approved backlog (`epic-flow.md`). `/so:start` needs an epic
    `IN_DELIVERY`, no active story, a story `READY` in its backlog (or a `US-00` story it lists),
-   and for a `web` story with `depends_on`, that story `DONE`.
+   for a `web` story with `depends_on` that story `DONE`, every earlier story in the table `DONE`
+   or `DROPPED` (or the human's confirmation), and a clean `apps/` + `packages/` tree.
 3. `PASS` → `next`, `attempt: 1`. `CHANGES_REQUIRED` → the `loop_back` target; `attempt` grows
    when the same stage repeats. `BLOCKED` → stay, `status: BLOCKED`.
 4. A gate with `required_when` that does not hold is skipped: one history event with verdict
@@ -107,5 +109,6 @@ One JSON object per line, append-only, never rewritten.
 ```
 
 `verdict` is a stage verdict or a lifecycle marker: `EPIC_ACTIVATED`, `BACKLOG_APPROVED`,
-`ACTIVATED`, `HUMAN_APPROVED`, `HUMAN_REJECTED`, `SKIPPED`, `DONE`, `EPIC_DONE`. Epic-stage
+`ACTIVATED`, `HUMAN_APPROVED`, `HUMAN_REJECTED`, `SKIPPED`, `DONE`, `EPIC_DONE`, `BACKLOG_AMEND`,
+`PARKED`, `CONTINUED`. Epic-stage
 events have `story: null`. For human decisions `skill` is `null` and `note` holds the comment.

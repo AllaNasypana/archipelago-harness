@@ -47,7 +47,7 @@ docs/stories/epic-03/
 
 ### `BACKLOG_SYNC` — `backlog-sync`
 
-Cuts the epic into stories and writes `backlog.md`, every `story.md` (status `PROPOSED`) and the
+Cuts the epic into stories and writes `backlog.md` (every story `PROPOSED`), every `story.md` and the
 first `decisions.md` with product questions the epic leaves open. Questions about project-wide
 conventions (error format, pagination, IDs, dates, logging — AGENTS.md §5) are proposed as ADRs,
 not decided per epic.
@@ -87,6 +87,11 @@ mandatory.
 
 You review the split, order, dependencies and risk once per epic. Approve → stories become
 `READY`. Reject with a comment → `BACKLOG_SYNC` writes a new version.
+
+**Amend.** During delivery, `/so:epic <Epic> <feedback>` changes an approved backlog: a split
+proposed at `CLARIFICATION`, a new api story for a contract gap, deferred stories that are now
+unblocked. A `BLOCKED` active story is parked (back to `READY`). Started stories never change;
+a replaced `READY` story becomes `DROPPED`. The backlog passes this gate again.
 
 ## Story level
 
@@ -188,8 +193,11 @@ frees the workflow for the next `/so:start`.
 | Any human gate   | `/so:reject [stage] <comment>`                                          | `on_reject` or a listed `reject_targets` stage                 |
 
 A revised artifact is `DRAFT` again, so the story passes its gate again. A web story that finds a
-gap in its api contract does not loop into the api story: it goes `BLOCKED`, and a new or
-reopened api story fixes the contract.
+gap in its api contract does not loop into the api story: it goes `BLOCKED`, and a new api story added with `/so:epic <Epic> <feedback>`
+fixes the contract (the blocked story is parked meanwhile).
+
+A stage that runs more than `max_attempts` (3) times in a row is `BLOCKED` until you run
+`/so:next continue`.
 
 ## Code quality bar
 
@@ -232,13 +240,13 @@ generated client drift, `en`/`uk` key completeness, Playwright e2e (ADR-001).
 
 ## Decisions and open questions
 
-| ID   | Topic                 | Status      | Decision                                                                                               |
-| ---- | --------------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
-| OQ-1 | Story source          | **decided** | `BACKLOG_SYNC` cuts the active epic into stories under `docs/stories/epic-<nn>/` (user, 2026-11-11)    |
-| OQ-2 | Design stages         | **decided** | Design is a section of `spec.md` per layer; replaces the separate `UI_DESIGN` stage (user, 2026-11-11) |
-| OQ-3 | Implementor           | **decided** | One `IMPLEMENTATION` stage, Skill chosen by `layer` (user, 2026-11-09)                                 |
-| OQ-4 | Web test runner / e2e | **decided** | Vitest + Testing Library; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md) |
-| OQ-5 | Command prefix        | **decided** | `/so:` (user, 2026-11-09)                                                                              |
-| OQ-6 | Story ID format       | **decided** | `US-<epic>-<nn>-<layer>` (user, 2026-11-09)                                                            |
-| OQ-7 | Workflow size         | **decided** | Compact flow, plan gate for `risk: high` only (user, 2026-11-11)                                       |
-| OQ-8 | Git after acceptance  | open        | What happens in Git when a story is accepted; to decide later (user, 2026-11-11)                       |
+| ID   | Topic                 | Status      | Decision                                                                                                                                                                                          |
+| ---- | --------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OQ-1 | Story source          | **decided** | `BACKLOG_SYNC` cuts the active epic into stories under `docs/stories/epic-<nn>/` (user, 2026-11-11)                                                                                               |
+| OQ-2 | Design stages         | **decided** | Design is a section of `spec.md` per layer; replaces the separate `UI_DESIGN` stage (user, 2026-11-11)                                                                                            |
+| OQ-3 | Implementor           | **decided** | One `IMPLEMENTATION` stage, Skill chosen by `layer` (user, 2026-11-09)                                                                                                                            |
+| OQ-4 | Web test runner / e2e | **decided** | Vitest + Testing Library; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md)                                                                                            |
+| OQ-5 | Command prefix        | **decided** | `/so:` (user, 2026-11-09)                                                                                                                                                                         |
+| OQ-6 | Story ID format       | **decided** | `US-<epic>-<nn>-<layer>` (user, 2026-11-09)                                                                                                                                                       |
+| OQ-7 | Workflow size         | **decided** | Compact flow, plan gate for `risk: high` only (user, 2026-11-11)                                                                                                                                  |
+| OQ-8 | Git after acceptance  | open        | What happens in Git when a story is accepted; to decide later (user, 2026-11-11). Until then `/so:start` needs a clean `apps/` + `packages/` tree, so the human commits or stashes accepted work. |

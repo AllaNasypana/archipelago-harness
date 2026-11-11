@@ -84,7 +84,11 @@ Body, in this order:
    the reason.
 3. **Open questions** — what blocks slicing; resolved ones move to `decisions.md`.
 
-Only the orchestrator edits the Status column after approval.
+Only the orchestrator edits the Status column after approval, and raises Risk when
+`SPECIFICATION` does (`story.md` keeps the risk proposed at slicing).
+
+An amend adds a fourth section, **Amendment**: what changed in this version and a **Drop on
+approval** list of `READY` stories it replaces, each with the reason.
 
 ## Epic decisions (`decisions.md`)
 

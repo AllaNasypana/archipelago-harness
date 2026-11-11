@@ -40,7 +40,10 @@ artifacts:
     pattern: docs/stories/epic-{epic}/backlog.md
     owner: backlog-sync
     also_written_by:
-      - { writer: story-orchestrator, scope: 'Status column of the story table' }
+      - {
+          writer: story-orchestrator,
+          scope: 'Status column; Risk column raised after SPECIFICATION',
+        }
     note: >
       The epic's story list in delivery order (id, layer, title, depends_on,
       risk, status) and the epic AC coverage table. Also the story catalog:

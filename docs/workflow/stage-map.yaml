@@ -21,13 +21,14 @@
 # =============================================================================
 
 version: 2
-status: draft # becomes `active` once the stage Skills exist
+status: active
+max_attempts: 3 # runs of one stage in a row; more → BLOCKED until a human says continue
 workflow: epic-delivery
 
 commands:
-  epic: '/so:epic <Epic>' # activate an epic, run BACKLOG_SYNC
+  epic: '/so:epic <Epic> [feedback]' # activate an epic, or amend its approved backlog
   start: '/so:start <StoryId>' # activate a READY story of the active epic
-  next: '/so:next' # run the current stage
+  next: '/so:next [continue]' # run the current stage; `continue` clears an attempt limit
   status: '/so:status'
   approve: '/so:approve [comment]'
   reject: '/so:reject [target-stage] <comment>'
@@ -54,8 +55,8 @@ story_rules:
     A web story that consumes an endpoint names its api story in `depends_on`
     and may start only when that story is DONE: OpenAPI is generated from code,
     so the contract is the merged endpoint plus the regenerated client. A
-    contract gap found later makes the web story BLOCKED; a new or reopened api
-    story fixes it.
+    contract gap found later makes the web story BLOCKED; a new api story added
+    by a backlog amend (`/so:epic <Epic> <feedback>`) fixes it.
   risk:
     # `risk: high` makes HUMAN_PLAN_APPROVAL mandatory. BACKLOG_SYNC proposes it,
     # the human confirms it at HUMAN_BACKLOG_APPROVAL, SPECIFICATION may raise it.
@@ -81,9 +82,10 @@ epic_stages:
     next: HUMAN_BACKLOG_APPROVAL
     does: >
       Cuts the epic into small single-layer stories, writes backlog.md (order,
-      depends_on, risk, epic AC coverage) and one story.md per story with status
-      PROPOSED. Seeds epic_decisions with product questions the epic leaves
-      open. Questions about project-wide conventions (error format, pagination,
+      depends_on, risk, epic AC coverage, every story PROPOSED in its Status
+      column) and one story.md per story. Seeds epic_decisions with product
+      questions the epic leaves open. In `amend` mode it adds stories to an
+      approved backlog without touching started ones. Questions about project-wide conventions (error format, pagination,
       IDs, dates, logging) are proposed as ADRs, never decided here.
 
   HUMAN_BACKLOG_APPROVAL:
@@ -184,7 +186,8 @@ story_stages:
     next: IMPLEMENTATION
     does: >
       Writes the tests from the AC -> test matrix and runs them; they must fail
-      for the right reason (red). Vitest in both apps, Testing Library in web
+      for the right reason (red). On a re-entry after IMPLEMENTATION only tests
+      for behavior that is still missing must be red. Vitest in both apps, Testing Library in web
       (ADR-001), api e2e for HTTP flows.
     loop_back:
       plan_gap: PLANNING
@@ -258,5 +261,7 @@ story_stages:
 # Loop-backs: a Skill may name only a key under its stage's `loop_back`. A human
 # rejection goes to `on_reject`, or to a stage named in `reject_targets`. An
 # unknown key or target holds the stage as BLOCKED pending a human decision.
+# A stage run more than `max_attempts` times in a row is BLOCKED until a human
+# runs `/so:next continue` (attempt resets to 1).
 #
 # Human gates: a review PASS is never approval. Only /so:approve passes a gate.

@@ -35,7 +35,8 @@ Read the code you will touch before changing it.
 6. If the story changes an endpoint, regenerate `packages/api-client` with the project's
    generator; never edit generated files.
 7. Remove every stub listed in `tests.md`. Never change a test's expectation to make it pass;
-   if a test is wrong, stop and return `CHANGES_REQUIRED` + `plan_gap`.
+   if a test is wrong, stop and return `CHANGES_REQUIRED` + `plan_gap`. Never edit a test file
+   listed in `tests.md`: REVIEW compares their SHA-256.
 8. Finish with `pnpm --filter @archipelago/api lint typecheck test` and `test:e2e` when relevant.
 
 ## Code bar

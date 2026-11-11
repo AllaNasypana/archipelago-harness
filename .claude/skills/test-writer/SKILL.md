@@ -36,6 +36,13 @@ planned signature that throws `not implemented`), each listed in `tests.md`.
 7. Run the new tests: `pnpm --filter <package> test` (and `test:e2e` when written). Every new test
    must **fail**, and fail because the behavior is missing — not from a syntax, import or setup
    error. Fix those until the failure is the right one.
+8. Record the SHA-256 of every test file in `tests.md` (`shasum -a 256 <files>`) after the red
+   run. IMPLEMENTATION never edits these files; REVIEW compares the hashes.
+9. **Re-entry after IMPLEMENTATION** (`test_gap` from REVIEW, or a rejection to `TEST_FIRST`):
+   production code exists. Add or fix only the tests the key or comment names. A test for
+   behavior that is still missing must fail; one that passes on entry because the code already
+   does it goes under **Green on entry** with the reason. Leave other tests unchanged and
+   re-record every hash.
 
 ## `tests.md`
 
@@ -51,11 +58,20 @@ Files created only so tests compile (removed or filled by IMPLEMENTATION).
 ## Red run
 
 Command, exit code, and the failing test names with one-line reasons (trimmed output).
+
+## Green on entry
+
+Re-entry only: tests that pass on entry, each with the reason.
+
+## Test file hashes
+
+| Test file | SHA-256 |
 ```
 
 ## Result
 
-`PASS` when every matrix row has a test and all of them fail for the right reason.
+`PASS` when every matrix row has a test and all of them fail for the right reason (on a
+re-entry: or are listed under Green on entry), with every hash recorded.
 `CHANGES_REQUIRED` + `plan_gap` when the matrix cannot be tested as planned (missing seam, wrong
 level); + `specification_gap` when an AC is not testable as written. `BLOCKED` when the test
 environment does not run (say which command failed and why).

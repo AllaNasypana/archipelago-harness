@@ -30,8 +30,8 @@ does stage work: no slicing, clarification, specs, plans, tests, code or reviews
 This Skill holds no stage list and no paths of its own. If it seems to disagree with those files,
 they win: stop and report the drift.
 
-You write only: `workflow-state.yaml`, `history.jsonl` (append-only), the Status column of
-`backlog.md`, and `status` of artifacts after a gate or `DONE` (`artifact-lifecycle.md` §1).
+You write only: `workflow-state.yaml`, `history.jsonl` (append-only), the Status column (and a
+raised Risk) of `backlog.md`, and `status` of artifacts after a gate or `DONE` (`artifact-lifecycle.md` §1).
 
 ## Modes
 
@@ -86,7 +86,9 @@ story.
 - Never turn `CHANGES_REQUIRED` or `BLOCKED` into progress; never invent a result.
 - Entering a gate: see `human-gates.md` (including the `required_when` skip).
 - After `SPECIFICATION` passes, read `risk` from `spec.md` front matter; if it is `high`, set
-  `story.risk: high` in state (risk only goes up).
+  `story.risk: high` in state and in the story's backlog Risk column (risk only goes up).
+- `attempt` would exceed `max_attempts` (`stage-map.yaml`) → `BLOCKED` with "attempt limit
+  reached at <stage>"; only `/so:next continue` from a human clears it (`continue-flow.md`).
 
 ## Invariants — check before invoking
 
