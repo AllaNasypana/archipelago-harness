@@ -1,0 +1,2 @@
+{"timestamp":"2026-11-11T12:49:05Z","epic":"EPIC-01","story":null,"from_stage":null,"to_stage":"BACKLOG_SYNC","skill":null,"verdict":"EPIC_ACTIVATED","artifacts":[],"attempt":1,"note":null}
+{"timestamp":"2026-11-11T12:49:05Z","epic":"EPIC-01","story":null,"from_stage":"BACKLOG_SYNC","to_stage":"HUMAN_BACKLOG_APPROVAL","skill":"backlog-sync","verdict":"PASS","artifacts":["docs/stories/epic-01/backlog.md"],"attempt":1,"note":"reused existing DRAFT backlog (migrated slice); skill not re-run"}

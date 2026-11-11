@@ -1,14 +1,32 @@
 # Execution state of the delivery workflow. Schema: docs/workflow/state-schema.md
 # Writer: story-orchestrator ONLY. Stage Skills never write this file.
 version: 2
-epic: null
+epic:
+  id: EPIC-01
+  status: BACKLOG
+  backlog: docs/stories/epic-01/backlog.md
+  activated_at: 2026-11-11T12:49:05Z
 story: null
-status: IDLE
-current_stage: null
-previous_stage: null
+status: WAITING_FOR_HUMAN
+current_stage: HUMAN_BACKLOG_APPROVAL
+previous_stage: BACKLOG_SYNC
 attempt: 1
-last_result: null
-pending_human_gate: null
+last_result:
+  stage: BACKLOG_SYNC
+  verdict: PASS
+  recorded_at: 2026-11-11T12:49:05Z
+  artifacts:
+    - { type: backlog, path: docs/stories/epic-01/backlog.md, version: 1 }
+pending_human_gate:
+  stage: HUMAN_BACKLOG_APPROVAL
+  status: PENDING
+  required_artifacts:
+    - { type: backlog, path: docs/stories/epic-01/backlog.md, version: 1 }
+  automated_verdict: null
+  requested_at: 2026-11-11T12:49:05Z
+  decided_at: null
+  decided_by: null
+  comment: null
 blocking_issues: []
 non_blocking_findings: 0
-updated_at: null
+updated_at: 2026-11-11T12:49:05Z
