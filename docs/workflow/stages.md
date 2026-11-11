@@ -193,8 +193,7 @@ frees the workflow for the next `/so:start`.
 | Any human gate   | `/so:reject [stage] <comment>`                                          | `on_reject` or a listed `reject_targets` stage                 |
 
 A revised artifact is `DRAFT` again, so the story passes its gate again. A web story that finds a
-gap in its api contract does not loop into the api story: it goes `BLOCKED`, and a new api story added with `/so:epic <Epic> <feedback>`
-fixes the contract (the blocked story is parked meanwhile).
+gap in its api contract does not loop into the api story: it goes `BLOCKED`, and a backlog amend (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web story that depends on it; the blocked story is parked, then dropped.
 
 A stage that runs more than `max_attempts` (3) times in a row is `BLOCKED` until you run
 `/so:next continue`.

@@ -82,8 +82,7 @@ missing decision.
 | BFF and data  | route handlers, api client calls (from the dependency's spec), how each api error is shown, session effects                                                           |
 | Accessibility | keyboard path, labels, not color alone, 360 px where BRD D9 requires it                                                                                               |
 
-A web spec never changes the api contract. A gap in it → `BLOCKED` (a new api story added with `/so:epic <Epic> <feedback>`
-fixes it).
+A web spec never changes the api contract. A gap in it → `BLOCKED`: a backlog amend (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web story that depends on it.
 
 ## Quality bar
 

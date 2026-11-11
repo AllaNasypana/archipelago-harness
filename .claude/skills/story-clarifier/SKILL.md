@@ -45,7 +45,7 @@ Resolve paths from `docs/workflow/artifact-paths.yaml`; the orchestrator passes 
 2. **Web story with `depends_on`:** the api story's decisions, error responses and validation
    rules are inherited. Record them as `answered-from-repo` (source: the api `spec.md`); never
    ask them again. A gap in that contract is not yours to fill: note it, and it becomes a
-   `BLOCKED` result (a new api story added with `/so:epic <Epic> <feedback>` fixes it). A new epic decision that would
+   `BLOCKED` result (a backlog amend (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web story that depends on it). A new epic decision that would
    contradict the api story's spec is not recorded as settled: it is an api contract gap →
    `BLOCKED`.
 3. If `clarification.md` exists, this is a **resume**: keep answered questions settled and go on

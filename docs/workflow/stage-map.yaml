@@ -55,8 +55,9 @@ story_rules:
     A web story that consumes an endpoint names its api story in `depends_on`
     and may start only when that story is DONE: OpenAPI is generated from code,
     so the contract is the merged endpoint plus the regenerated client. A
-    contract gap found later makes the web story BLOCKED; a new api story added
-    by a backlog amend (`/so:epic <Epic> <feedback>`) fixes it.
+    contract gap found later makes the web story BLOCKED; a backlog amend
+    (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web
+    story that depends on it, and drops the blocked one.
   risk:
     # `risk: high` makes HUMAN_PLAN_APPROVAL mandatory. BACKLOG_SYNC proposes it,
     # the human confirms it at HUMAN_BACKLOG_APPROVAL, SPECIFICATION may raise it.

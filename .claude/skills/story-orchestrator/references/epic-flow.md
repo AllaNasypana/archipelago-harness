@@ -51,7 +51,10 @@ before this round).
 Before an amend, a `BLOCKED` active story is parked: set it `READY` in `backlog.md`, append
 `{"verdict":"PARKED","note":"<blocking issue>",...}`, and reset the story as `state-schema.md`
 rule 7 does, without `DONE`. Its artifacts stay; a later `/so:start` begins at `CLARIFICATION`
-and reuses whatever is still current.
+and reuses whatever is still current. Its uncommitted code and tests in `apps/` or `packages/`
+would block the next `/so:start` (clean tree): ask the human to stash them
+(`git stash push -u -m "<StoryId> parked" -- apps packages`) and put the stash name in the
+`PARKED` note; never stash or discard yourself.
 
 ## Epic done
 

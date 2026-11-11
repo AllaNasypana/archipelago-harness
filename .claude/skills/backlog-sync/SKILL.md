@@ -45,8 +45,9 @@ an ADR.
   before the stories that need them; update coverage; bump `version`, `status: DRAFT`. A `READY`
   story the change replaces goes under **Amendment → Drop on approval** with the reason (the
   orchestrator drops it on approval). Never edit a story that is `READY`, `ACTIVE`, `DONE` or
-  `DROPPED`; a web story keeps its `depends_on`, and table order makes the new api story come
-  first.
+  `DROPPED`. A contract gap: add the new api story, put the blocked web story under **Drop on
+  approval**, and add a replacement web story (new ID, `depends_on` the new api story) that
+  carries its ACs over.
 
 ## How to slice
 
