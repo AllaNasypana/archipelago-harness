@@ -81,7 +81,8 @@ Body, in this order:
    `ID | Layer | Title | Depends on | Risk | BRD refs | Epic refs | ACs | Status`. Foundation
    stories (`US-00-…`) used by this epic appear here too, linked to their `epic-00` folder.
 2. **Coverage** — every epic AC mapped to stories, or marked `deferred` / `out of scope` with
-   the reason.
+   the reason; then **Carried over**: every decision from another epic that hands off to this
+   one, with its ACs mapped to stories (or the constraint applied).
 3. **Open questions** — what blocks slicing; resolved ones move to `decisions.md`.
 
 Only the orchestrator edits the Status column after approval, and raises Risk when
@@ -112,7 +113,11 @@ One entry per decision, never renumbered:
 - **Decision:** … (empty while OPEN)
 - **Source:** human, YYYY-MM-DD, at US-03-02-api CLARIFICATION | BRD BR-009
 - **Affects:** US-03-02-api, US-03-02-web
+- **Hands off to:** EPIC-06 (only when the decision gives work or a constraint to another epic's backlog)
 ```
+
+`backlog-sync` of a later epic finds its carry-over through **Hands off to** (`backlog-sync`
+→ Carry-over).
 
 A story whose clarification depends on an `OPEN` decision cannot pass `CLARIFICATION`. A decision
 that is project-wide (AGENTS.md §5 conventions) is not recorded here: it becomes a proposed ADR.

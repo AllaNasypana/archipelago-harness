@@ -19,17 +19,18 @@ an ADR.
 
 ## Read first
 
-| What                                 | Where                                                                      |
-| ------------------------------------ | -------------------------------------------------------------------------- |
-| Story rules: size, layers, risk, IDs | `docs/workflow/stage-map.yaml` → `story_rules`, `epic_stages.BACKLOG_SYNC` |
-| Paths                                | `docs/workflow/artifact-paths.yaml` → `backlog`, `epic_decisions`, `story` |
-| Front matter and body formats        | `docs/workflow/artifact-schema.md`; templates in `references/templates.md` |
-| The epic                             | its ACs, flows, screen inventory, open items, revision log                 |
-| Requirement IDs                      | BRD FR/BR/NFR with `Phase: EPIC-<nn>`                                      |
-| UI references and corrections        | `docs/design/README.md`                                                    |
-| Boundaries                           | `AGENTS.md` §3–5, `apps/api/AGENTS.md`, `apps/web/AGENTS.md`               |
-| Accepted / proposed decisions        | `docs/adr/`                                                                |
-| Existing stories (never reuse an ID) | every `docs/stories/epic-*/backlog.md`, especially `epic-00` foundation    |
+| What                                 | Where                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------ |
+| Story rules: size, layers, risk, IDs | `docs/workflow/stage-map.yaml` → `story_rules`, `epic_stages.BACKLOG_SYNC`     |
+| Paths                                | `docs/workflow/artifact-paths.yaml` → `backlog`, `epic_decisions`, `story`     |
+| Front matter and body formats        | `docs/workflow/artifact-schema.md`; templates in `references/templates.md`     |
+| The epic                             | its ACs, flows, screen inventory, open items, revision log                     |
+| Requirement IDs                      | BRD FR/BR/NFR with `Phase: EPIC-<nn>`                                          |
+| UI references and corrections        | `docs/design/README.md`                                                        |
+| Boundaries                           | `AGENTS.md` §3–5, `apps/api/AGENTS.md`, `apps/web/AGENTS.md`                   |
+| Accepted / proposed decisions        | `docs/adr/`                                                                    |
+| Existing stories (never reuse an ID) | every `docs/stories/epic-*/backlog.md`, especially `epic-00` foundation        |
+| Carry-over from other epics          | every `docs/stories/epic-*/decisions.md` entry with **Hands off to** this epic |
 
 ## Modes
 
@@ -75,12 +76,17 @@ an ADR.
    Notes (module or feature folder, exceptions) and, for web, the mockup panels and corrections.
    ACs state observable behavior, never implementation — endpoint shapes and libraries are
    decided at `SPECIFICATION` / `PLANNING`.
-8. **Prove coverage.** Every epic AC is mapped to stories, or marked `deferred` / `out of scope`
-   with a reason. A missing row means the backlog is not done.
-9. **Decisions.** Product questions the epic leaves open go to `decisions.md` as `OPEN`, each
-   naming the stories it affects; answers the human already gave are `DECIDED` with the date.
-   Project-wide conventions (error format, pagination, IDs, dates, logging) are not product
-   decisions: list them under "Open questions" in `backlog.md` as "needs an ADR".
+8. **Carry-over.** Every decision in another epic's `decisions.md` that hands off to this epic
+   is part of this backlog: deferred ACs become stories here (epic refs keep the source IDs, e.g.
+   `EPIC-01 ONB-AC-07`, plus the decision ID), constraints shape the stories they name. Never
+   edit the other epic's files.
+9. **Prove coverage.** Every epic AC is mapped to stories, or marked `deferred` / `out of scope`
+   with a reason, and every carry-over is mapped under **Carried over**. A missing row means the
+   backlog is not done.
+10. **Decisions.** Product questions the epic leaves open go to `decisions.md` as `OPEN`, each
+    naming the stories it affects; answers the human already gave are `DECIDED` with the date.
+    Project-wide conventions (error format, pagination, IDs, dates, logging) are not product
+    decisions: list them under "Open questions" in `backlog.md` as "needs an ADR".
 
 ## Quality checks before returning
 

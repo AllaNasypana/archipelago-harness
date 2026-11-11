@@ -86,7 +86,8 @@ epic_stages:
       depends_on, risk, epic AC coverage, every story PROPOSED in its Status
       column) and one story.md per story. Seeds epic_decisions with product
       questions the epic leaves open. In `amend` mode it adds stories to an
-      approved backlog without touching started ones. Questions about project-wide conventions (error format, pagination,
+      approved backlog without touching started ones. Also slices the work other
+      epics' decisions hand off to this epic (`Hands off to`). Questions about project-wide conventions (error format, pagination,
       IDs, dates, logging) are proposed as ADRs, never decided here.
 
   HUMAN_BACKLOG_APPROVAL:
