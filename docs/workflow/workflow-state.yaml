@@ -3,30 +3,16 @@
 version: 2
 epic:
   id: EPIC-01
-  status: BACKLOG
+  status: IN_DELIVERY
   backlog: docs/stories/epic-01/backlog.md
   activated_at: 2026-11-11T12:49:05Z
 story: null
-status: WAITING_FOR_HUMAN
-current_stage: HUMAN_BACKLOG_APPROVAL
-previous_stage: BACKLOG_SYNC
+status: IDLE
+current_stage: null
+previous_stage: null
 attempt: 1
-last_result:
-  stage: BACKLOG_SYNC
-  verdict: PASS
-  recorded_at: 2026-11-11T12:49:05Z
-  artifacts:
-    - { type: backlog, path: docs/stories/epic-01/backlog.md, version: 1 }
-pending_human_gate:
-  stage: HUMAN_BACKLOG_APPROVAL
-  status: PENDING
-  required_artifacts:
-    - { type: backlog, path: docs/stories/epic-01/backlog.md, version: 1 }
-  automated_verdict: null
-  requested_at: 2026-11-11T12:49:05Z
-  decided_at: null
-  decided_by: null
-  comment: null
+last_result: null
+pending_human_gate: null
 blocking_issues: []
 non_blocking_findings: 0
-updated_at: 2026-11-11T12:49:05Z
+updated_at: 2026-11-11T19:39:29Z

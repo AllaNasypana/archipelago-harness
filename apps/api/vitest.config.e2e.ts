@@ -6,5 +6,7 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
+    // AppModule connects to the database: needs `pnpm db:up` and apps/api/.env.
+    setupFiles: ['dotenv/config'],
   },
 });

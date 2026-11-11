@@ -39,8 +39,9 @@ Rules in short:
 ## Database (Prisma 7)
 
 - Owns PostgreSQL schema **`app`** only, connecting as `app_user`; it never touches schema `bff`.
-- Schema: `prisma/schema.prisma`; migrations: `prisma/migrations/`; config: `prisma7.config.ts`
-  (reads `DATABASE_URL` from `.env`).
+- Schema: `prisma/schema.prisma`; migrations: `prisma/migrations/`; config: `prisma.config.ts`
+  (Prisma CLI only; reads `DATABASE_URL` from `.env`). The app reads `DATABASE_URL` through
+  `@nestjs/config` and refuses to start unless it names user `app_user` and `?schema=app`.
 - The client is generated into `src/infrastructure/database/generated/prisma`.
 - No models yet — they are added per approved story. Migrations need a task-appropriate review
   (AGENTS.md §7).
@@ -61,8 +62,9 @@ Run from this folder or with `pnpm --filter @archipelago/api <script>`:
 | `pnpm build` / `pnpm start:prod`                  | Compile to `dist/` / run the build                     |
 | `pnpm lint`                                       | oxlint (type-aware)                                    |
 | `pnpm typecheck`                                  | `tsc --noEmit`                                         |
-| `pnpm test` / `pnpm test:watch` / `pnpm test:cov` | Vitest unit tests                                      |
-| `pnpm test:e2e`                                   | Vitest e2e (`vitest.config.e2e.ts`)                    |
+| `pnpm test` / `pnpm test:watch` / `pnpm test:cov` | Vitest unit tests (no database)                        |
+| `pnpm test:int`                                   | Integration tests `*.int-spec.ts` (needs `pnpm db:up`) |
+| `pnpm test:e2e`                                   | Vitest e2e (`vitest.config.e2e.ts`, needs `db:up`)     |
 | `pnpm prisma:generate`                            | Generate the Prisma client                             |
 
 Testing expectations: unit tests for business rules; integration tests for Prisma transactions,

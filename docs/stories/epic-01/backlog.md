@@ -2,7 +2,7 @@
 artifact_type: backlog
 epic: EPIC-01
 version: 1
-status: DRAFT
+status: APPROVED
 updated_at: 2026-11-11T00:00:00Z
 produced_by: backlog-sync
 inputs:
@@ -24,34 +24,34 @@ added in the migration and is a proposal for HUMAN_BACKLOG_APPROVAL.
 
 ## Stories
 
-| ID                                               | Layer | Title                                   | Depends on   | Risk   | BRD refs                       | Epic refs                                    | ACs | Status   |
-| ------------------------------------------------ | ----- | --------------------------------------- | ------------ | ------ | ------------------------------ | -------------------------------------------- | --- | -------- |
-| [US-00-01-api](../epic-00/US-00-01-api/story.md) | api   | Database access and Unit of Work        | —            | high   | BR-001, NFR-003                | REG-03, §6.1                                 | 3   | PROPOSED |
-| [US-00-02-api](../epic-00/US-00-02-api/story.md) | api   | Transactional outbox and email delivery | —            | high   | BR-001, NFR-004                | EV-01, UF-01, §7.10                          | 4   | PROPOSED |
-| [US-00-01-web](../epic-00/US-00-01-web/story.md) | web   | Localization setup                      | —            | normal | NFR-005                        | UI-AC-05                                     | 4   | PROPOSED |
-| [US-00-02-web](../epic-00/US-00-02-web/story.md) | web   | BFF session store and cookie            | —            | high   | NFR-001, NFR-004               | SES-05, SES-AC-04, §7.1                      | 5   | PROPOSED |
-| [US-00-03-web](../epic-00/US-00-03-web/story.md) | web   | Auth layout and form fields             | —            | normal | NFR-005, NFR-007               | UI-AC-01…04, UI-AC-06                        | 5   | PROPOSED |
-| [US-00-04-web](../epic-00/US-00-04-web/story.md) | web   | App shell                               | —            | normal | FR-045, NFR-005                | §8 shared visual language, UF-04 step 1      | 4   | PROPOSED |
-| [US-01-01-api](US-01-01-api/story.md)            | api   | Sign in with email and password         | —            | high   | FR-002, BR-003, BR-005         | LOGIN-AC-02, 05…08, SES-AC-11                | 5   | PROPOSED |
-| [US-01-01-web](US-01-01-web/story.md)            | web   | Sign-in page                            | US-01-01-api | high   | FR-002                         | LOGIN-AC-01…04, UI-02                        | 5   | PROPOSED |
-| [US-01-02-web](US-01-02-web/story.md)            | web   | Welcome screen                          | —            | high   | FR-007                         | ONB-AC-04…06, 18…20, 23, 29, UI-AC-07, UI-05 | 4   | PROPOSED |
-| [US-01-03-api](US-01-03-api/story.md)            | api   | Register an account                     | —            | high   | FR-001, BR-001, BR-002, BR-006 | REG-AC-02…07, 09, 10, ONB-AC-01, 02          | 5   | PROPOSED |
-| [US-01-03-web](US-01-03-web/story.md)            | web   | Registration page                       | US-01-03-api | high   | FR-001                         | REG-AC-01…06, 08…10, ONB-AC-01, 03, UI-01    | 5   | PROPOSED |
-| [US-01-04-api](US-01-04-api/story.md)            | api   | Session refresh and lifetime            | —            | high   | FR-003, BR-003                 | SES-AC-01…03, 08                             | 4   | PROPOSED |
-| [US-01-04-web](US-01-04-web/story.md)            | web   | Session Expired and recovery            | US-01-04-api | high   | FR-003                         | SES-AC-08…11, UI-03                          | 5   | PROPOSED |
-| [US-01-05-api](US-01-05-api/story.md)            | api   | Sign out                                | —            | high   | FR-004                         | SES-AC-05                                    | 2   | PROPOSED |
-| [US-01-05-web](US-01-05-web/story.md)            | web   | Log out from the profile menu           | US-01-05-api | high   | FR-004, FR-045                 | SES-AC-05…07, UI-04                          | 4   | PROPOSED |
-| [US-01-06-api](US-01-06-api/story.md)            | api   | Verify email                            | —            | high   | FR-005, BR-004                 | EV-AC-01, 03…05, 11                          | 5   | PROPOSED |
-| [US-01-06-web](US-01-06-web/story.md)            | web   | Verify email pages                      | US-01-06-api | high   | FR-005                         | EV-AC-04, 10, 11, UI-10, UI-11               | 4   | PROPOSED |
-| [US-01-07-api](US-01-07-api/story.md)            | api   | Verification status and resend          | —            | high   | FR-005, BR-004, NFR-008        | EV-AC-02, 06, 07, 09, 12                     | 5   | PROPOSED |
-| [US-01-07-web](US-01-07-web/story.md)            | web   | Unverified banner on Dashboard          | US-01-07-api | normal | FR-005                         | EV-AC-08, UI-12                              | 3   | PROPOSED |
-| [US-01-08-web](US-01-08-web/story.md)            | web   | Email status in Account settings        | US-01-07-api | normal | FR-005, FR-008                 | EV-AC-06, 09, UI-13                          | 4   | PROPOSED |
-| [US-01-09-api](US-01-09-api/story.md)            | api   | Request a password reset                | —            | high   | FR-006, BR-004, BR-005         | RESET-AC-01…04                               | 5   | PROPOSED |
-| [US-01-09-web](US-01-09-web/story.md)            | web   | Forgot password and Check your inbox    | US-01-09-api | normal | FR-006                         | RESET-AC-01, 04, 11, UI-06, UI-07            | 4   | PROPOSED |
-| [US-01-10-api](US-01-10-api/story.md)            | api   | Reset the password                      | —            | high   | FR-006, BR-002, BR-003         | RESET-AC-02, 05…08, 10, SES-AC-12            | 5   | PROPOSED |
-| [US-01-10-web](US-01-10-web/story.md)            | web   | Reset password form and result          | US-01-10-api | normal | FR-006                         | RESET-AC-05, 09, 11, UI-08, UI-09            | 4   | PROPOSED |
-| [US-01-11-api](US-01-11-api/story.md)            | api   | Continue with Google                    | —            | high   | FR-047, BR-033, BR-001, BR-003 | GOOG-AC-02…12                                | 5   | PROPOSED |
-| [US-01-11-web](US-01-11-web/story.md)            | web   | Continue with Google buttons and flow   | US-01-11-api | high   | FR-047                         | GOOG-AC-01, 04, 08, 10, UI-19                | 5   | PROPOSED |
+| ID                                               | Layer | Title                                   | Depends on   | Risk   | BRD refs                       | Epic refs                                    | ACs | Status |
+| ------------------------------------------------ | ----- | --------------------------------------- | ------------ | ------ | ------------------------------ | -------------------------------------------- | --- | ------ |
+| [US-00-01-api](../epic-00/US-00-01-api/story.md) | api   | Database access and Unit of Work        | —            | high   | BR-001, NFR-003                | REG-03, §6.1                                 | 3   | DONE   |
+| [US-00-02-api](../epic-00/US-00-02-api/story.md) | api   | Transactional outbox and email delivery | —            | high   | BR-001, NFR-004                | EV-01, UF-01, §7.10                          | 4   | READY  |
+| [US-00-01-web](../epic-00/US-00-01-web/story.md) | web   | Localization setup                      | —            | normal | NFR-005                        | UI-AC-05                                     | 4   | READY  |
+| [US-00-02-web](../epic-00/US-00-02-web/story.md) | web   | BFF session store and cookie            | —            | high   | NFR-001, NFR-004               | SES-05, SES-AC-04, §7.1                      | 5   | READY  |
+| [US-00-03-web](../epic-00/US-00-03-web/story.md) | web   | Auth layout and form fields             | —            | normal | NFR-005, NFR-007               | UI-AC-01…04, UI-AC-06                        | 5   | READY  |
+| [US-00-04-web](../epic-00/US-00-04-web/story.md) | web   | App shell                               | —            | normal | FR-045, NFR-005                | §8 shared visual language, UF-04 step 1      | 4   | READY  |
+| [US-01-01-api](US-01-01-api/story.md)            | api   | Sign in with email and password         | —            | high   | FR-002, BR-003, BR-005         | LOGIN-AC-02, 05…08, SES-AC-11                | 5   | READY  |
+| [US-01-01-web](US-01-01-web/story.md)            | web   | Sign-in page                            | US-01-01-api | high   | FR-002                         | LOGIN-AC-01…04, UI-02                        | 5   | READY  |
+| [US-01-02-web](US-01-02-web/story.md)            | web   | Welcome screen                          | —            | high   | FR-007                         | ONB-AC-04…06, 18…20, 23, 29, UI-AC-07, UI-05 | 4   | READY  |
+| [US-01-03-api](US-01-03-api/story.md)            | api   | Register an account                     | —            | high   | FR-001, BR-001, BR-002, BR-006 | REG-AC-02…07, 09, 10, ONB-AC-01, 02          | 5   | READY  |
+| [US-01-03-web](US-01-03-web/story.md)            | web   | Registration page                       | US-01-03-api | high   | FR-001                         | REG-AC-01…06, 08…10, ONB-AC-01, 03, UI-01    | 5   | READY  |
+| [US-01-04-api](US-01-04-api/story.md)            | api   | Session refresh and lifetime            | —            | high   | FR-003, BR-003                 | SES-AC-01…03, 08                             | 4   | READY  |
+| [US-01-04-web](US-01-04-web/story.md)            | web   | Session Expired and recovery            | US-01-04-api | high   | FR-003                         | SES-AC-08…11, UI-03                          | 5   | READY  |
+| [US-01-05-api](US-01-05-api/story.md)            | api   | Sign out                                | —            | high   | FR-004                         | SES-AC-05                                    | 2   | READY  |
+| [US-01-05-web](US-01-05-web/story.md)            | web   | Log out from the profile menu           | US-01-05-api | high   | FR-004, FR-045                 | SES-AC-05…07, UI-04                          | 4   | READY  |
+| [US-01-06-api](US-01-06-api/story.md)            | api   | Verify email                            | —            | high   | FR-005, BR-004                 | EV-AC-01, 03…05, 11                          | 5   | READY  |
+| [US-01-06-web](US-01-06-web/story.md)            | web   | Verify email pages                      | US-01-06-api | high   | FR-005                         | EV-AC-04, 10, 11, UI-10, UI-11               | 4   | READY  |
+| [US-01-07-api](US-01-07-api/story.md)            | api   | Verification status and resend          | —            | high   | FR-005, BR-004, NFR-008        | EV-AC-02, 06, 07, 09, 12                     | 5   | READY  |
+| [US-01-07-web](US-01-07-web/story.md)            | web   | Unverified banner on Dashboard          | US-01-07-api | normal | FR-005                         | EV-AC-08, UI-12                              | 3   | READY  |
+| [US-01-08-web](US-01-08-web/story.md)            | web   | Email status in Account settings        | US-01-07-api | normal | FR-005, FR-008                 | EV-AC-06, 09, UI-13                          | 4   | READY  |
+| [US-01-09-api](US-01-09-api/story.md)            | api   | Request a password reset                | —            | high   | FR-006, BR-004, BR-005         | RESET-AC-01…04                               | 5   | READY  |
+| [US-01-09-web](US-01-09-web/story.md)            | web   | Forgot password and Check your inbox    | US-01-09-api | normal | FR-006                         | RESET-AC-01, 04, 11, UI-06, UI-07            | 4   | READY  |
+| [US-01-10-api](US-01-10-api/story.md)            | api   | Reset the password                      | —            | high   | FR-006, BR-002, BR-003         | RESET-AC-02, 05…08, 10, SES-AC-12            | 5   | READY  |
+| [US-01-10-web](US-01-10-web/story.md)            | web   | Reset password form and result          | US-01-10-api | normal | FR-006                         | RESET-AC-05, 09, 11, UI-08, UI-09            | 4   | READY  |
+| [US-01-11-api](US-01-11-api/story.md)            | api   | Continue with Google                    | —            | high   | FR-047, BR-033, BR-001, BR-003 | GOOG-AC-02…12                                | 5   | READY  |
+| [US-01-11-web](US-01-11-web/story.md)            | web   | Continue with Google buttons and flow   | US-01-11-api | high   | FR-047                         | GOOG-AC-01, 04, 08, 10, UI-19                | 5   | READY  |
 
 `depends_on` names the one api story whose contract a web story consumes. Web stories with `—`
 have no API contract (pure UI or BFF plumbing). Api stories have no `depends_on`: the table order
