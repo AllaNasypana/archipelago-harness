@@ -66,7 +66,8 @@ story.
 4. Invoke by stage type:
    - `automated_skill` — always in a fresh subagent (Agent tool) with the prompt in
      `run-flow.md`: epic, story ID, layer, risk, stage, resolved input paths, the re-entry, and
-     the instruction to stay in its stage and return the result envelope. Never paste artifact
+     the instruction to stay in its stage and return the result envelope. Pass the Agent tool's
+     `model` chosen by `stage-map.yaml` → `models.choose` and record it in the history event. Never paste artifact
      bodies. `fresh_context: true` in `stage-map.yaml` marks the reviewers, for whom this
      independence is a requirement, not a preference.
    - `interactive_skill` — hand the conversation to the Skill in this session; it talks to the
@@ -167,7 +168,7 @@ Mode:              continue
 Epic:              EPIC-03 (IN_DELIVERY)
 Story:             US-03-02-api (api, risk normal)
 Stage:             SPEC_REVIEW → HUMAN_SPEC_APPROVAL
-Skill:             spec-reviewer (fresh context)
+Skill:             spec-reviewer (fresh context, model opus)
 Verdict:           PASS
 Artifacts:         docs/stories/epic-03/US-03-02-api/spec-review.md (v1)
 Workflow status:   WAITING_FOR_HUMAN

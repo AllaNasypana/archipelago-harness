@@ -34,6 +34,19 @@ commands:
   reject: '/so:reject [target-stage] <comment>'
 
 # -----------------------------------------------------------------------------
+# Models (automated stages run in subagents; the orchestrator passes `model`)
+# -----------------------------------------------------------------------------
+models:
+  choose: >
+    `escalate_to` when the stage is re-entered (a loop-back or rejection into
+    it, story-orchestrator SKILL.md -> Re-entry) or runs again in a row
+    (attempt >= 2); else `model_high_risk` when story.risk is high and the stage
+    has one; else the stage's `model`.
+  escalate_to: opus
+  interactive: session # CLARIFICATION and the orchestrator use the session model
+  record: every stage event in history.jsonl carries the `model` it ran on
+
+# -----------------------------------------------------------------------------
 # Story rules (applied by BACKLOG_SYNC, checked at HUMAN_BACKLOG_APPROVAL)
 # -----------------------------------------------------------------------------
 story_rules:
@@ -81,6 +94,7 @@ epic_stages:
   BACKLOG_SYNC:
     type: automated_skill
     skill: backlog-sync
+    model: opus
     inputs: [epic, brd, prd, design_index, adr, agents_rules, layer_rules]
     outputs: [backlog, story, epic_decisions]
     next: HUMAN_BACKLOG_APPROVAL
@@ -146,6 +160,8 @@ story_stages:
   SPECIFICATION:
     type: automated_skill
     skill: spec-writer
+    model: sonnet
+    model_high_risk: opus
     inputs:
       [
         story,
@@ -173,6 +189,7 @@ story_stages:
     type: automated_skill
     skill: spec-reviewer
     fresh_context: true # runs in a subagent that did not write the spec
+    model: opus
     inputs:
       [
         story,
@@ -204,6 +221,8 @@ story_stages:
   PLANNING:
     type: automated_skill
     skill: implementation-planner
+    model: sonnet
+    model_high_risk: opus
     inputs:
       [
         story,
@@ -235,6 +254,7 @@ story_stages:
   TEST_FIRST:
     type: automated_skill
     skill: test-writer
+    model: sonnet
     inputs:
       [story, specification, implementation_plan, dependency_spec, adr, agents_rules, layer_rules]
     outputs: [test_report]
@@ -253,6 +273,7 @@ story_stages:
     skill_by_layer:
       api: nest-implementor
       web: next-implementor
+    model: sonnet
     inputs:
       [
         story,
@@ -279,6 +300,7 @@ story_stages:
     type: automated_skill
     skill: story-reviewer
     fresh_context: true
+    model: opus
     inputs:
       [
         story,

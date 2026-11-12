@@ -194,6 +194,12 @@ working context, and the orchestrator keeps only the one-line results. Everythin
 you may `/clear` at any gate and continue with `/so:run`. `/so:next` does exactly one stage, for
 debugging the flow.
 
+**Models.** Each automated stage names its model in `stage-map.yaml`: `opus` for
+`BACKLOG_SYNC`, `SPEC_REVIEW` and `REVIEW`; `sonnet` for `SPECIFICATION` and `PLANNING` (`opus`
+when the story is `risk: high`), `TEST_FIRST` and `IMPLEMENTATION`. A re-entered or repeated stage
+escalates to `opus`. `CLARIFICATION` uses your session model. Every history event records the
+model, so the split can be tuned after an epic from where loop-backs actually happened.
+
 ## Loop-backs and rejections
 
 | From             | Key / reject target                                                     | To                                                             |

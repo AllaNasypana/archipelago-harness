@@ -108,6 +108,7 @@ One JSON object per line, append-only, never rewritten — except an epic restar
   "from_stage": "SPEC_REVIEW",
   "to_stage": "HUMAN_SPEC_APPROVAL",
   "skill": "spec-reviewer",
+  "model": "opus",
   "verdict": "PASS",
   "artifacts": ["docs/stories/epic-03/US-03-02-web/spec-review.md"],
   "attempt": 1,
@@ -118,4 +119,5 @@ One JSON object per line, append-only, never rewritten — except an epic restar
 `verdict` is a stage verdict or a lifecycle marker: `EPIC_ACTIVATED`, `BACKLOG_APPROVED`,
 `ACTIVATED`, `HUMAN_APPROVED`, `HUMAN_REJECTED`, `SKIPPED`, `DONE`, `EPIC_DONE`, `BACKLOG_AMEND`,
 `PARKED`, `CONTINUED`, `STALE_INPUT`. Epic-stage
-events have `story: null`. For human decisions `skill` is `null` and `note` holds the comment.
+events have `story: null`. For human decisions `skill` and `model` are `null` and `note` holds the comment. `model` is the
+model an automated stage ran on (`stage-map.yaml` → `models`), `"session"` for `CLARIFICATION`.

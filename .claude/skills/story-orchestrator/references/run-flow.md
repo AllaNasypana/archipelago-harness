@@ -25,14 +25,15 @@ Repeat, at most **12 iterations** per call (a story has 9 automated stages plus 
 4. **Otherwise** perform `continue-flow.md` steps 3–8 for the current stage, invoking the Skill
    through the subagent prompt below, then record the transition. `STALE_INPUT` routing counts as
    an iteration.
-5. Print one progress line: `<stage> → <next stage>: <verdict> (<artifact> v<n>)`.
+5. Print one progress line: `<stage> [<model>] → <next stage>: <verdict> (<artifact> v<n>)`.
 
 At the end, print the Orchestration Result (`SKILL.md`) for the last iteration and the next
 command.
 
 ## Subagent prompt
 
-Use the Agent tool (general-purpose). Pass paths, never artifact bodies:
+Use the Agent tool (general-purpose) with `model` from `stage-map.yaml` → `models.choose`. Pass
+paths, never artifact bodies:
 
 ````text
 You run one stage of the Archipelago delivery workflow.
