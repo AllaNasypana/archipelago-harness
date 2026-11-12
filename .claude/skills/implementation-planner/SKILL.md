@@ -52,9 +52,10 @@ an explicit decision.
 
 ## Decisions
 
-Libraries or patterns this story introduces (e.g. throttling, i18n, OpenAPI client generator),
-each with the option chosen and why. A decision that is architectural or project-wide needs an
-Accepted ADR — otherwise BLOCKED.
+Libraries or patterns this story introduces (e.g. throttling, i18n, OpenAPI client generator), each
+with the option chosen and why. Web: every Next.js API, file convention or config flag the plan
+relies on cites its guide in `apps/web/node_modules/next/dist/docs/` (stage-contract step 4). A
+decision that is architectural or project-wide needs an Accepted ADR — otherwise BLOCKED.
 
 ## AC → test matrix
 

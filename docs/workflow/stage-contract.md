@@ -26,7 +26,12 @@ hard-code them.
    comment) name; keep the rest unchanged. Revise in place (`version + 1`, `status: DRAFT`),
    append the re-entry to `feedback` (never to `inputs`), and add a **Feedback addressed**
    section: each blocking finding or comment → what changed, or why not.
-4. Reviewing again (your own artifact exists from an earlier run)? First check every blocking
+4. Web: this Next.js version differs from older ones. Before you name or use a Next.js API, file
+   convention or config flag (route segment files, `proxy.ts`, caching, `next.config.ts`), read its
+   guide in `apps/web/node_modules/next/dist/docs/` (not visible from the repo root) and cite the
+   doc path next to the choice in your artifact. Heed deprecation notices; memory of older
+   versions is not a source.
+5. Reviewing again (your own artifact exists from an earlier run)? First check every blocking
    finding of its previous version and mark each `resolved` or `still open` in Findings.
 
 ## While working
@@ -42,7 +47,7 @@ hard-code them.
 
 Write your artifact at its registry path with the front matter from `artifact-schema.md`
 (`inputs` = every document passed to you, each with its `version` or `commit`). Read no other
-workflow artifact or project document (the mockups `design_index` lists count as part of it): if
+workflow artifact or project document (code, tests and installed library docs are free; the mockups `design_index` lists count as part of it): if
 you need one, it is missing from the stage's `inputs`
 in `stage-map.yaml` — return `BLOCKED` naming it rather than reading it silently. Review Skills also write `verdict`.
 

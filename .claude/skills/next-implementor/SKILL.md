@@ -20,8 +20,8 @@ code principles", "Styling") and `apps/web/docs/web-patterns.md` — all binding
 `dependency_spec` (the api story's `spec.md`: calls, errors, shared vector sets), and
 `docs/design/README.md`: open the mockup panels the spec's Design row names
 (`docs/design/mockups/`) for layout and spacing; the README corrections and the spec win over the
-image. This Next.js version differs from older ones: read the relevant guide in
-`node_modules/next/dist/docs/` before using an API you are unsure of.
+image. Next.js APIs: as `stage-contract.md` step 4 says, from
+`apps/web/node_modules/next/dist/docs/`; follow the doc paths the plan cites.
 
 ## How
 

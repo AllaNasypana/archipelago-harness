@@ -39,8 +39,10 @@ hooks are tested without rendering.
    TEST_FIRST owns it and lists its hash), the web story imports it. Never copy cases.
 4. api: unit tests with in-memory fakes of ports; integration tests against the local database
    (`pnpm db:up`); e2e with the Nest testing module and supertest-style requests.
-5. web: Testing Library queries by role and label; user events, not `fireEvent`, where available;
-   mock only the network boundary (BFF / api client), never the component under test.
+5. web: Next.js test helpers (e.g. matcher checks for `proxy.ts`) come from the installed docs
+   (stage-contract step 4), not memory. Testing Library queries by role and label; user events, not
+   `fireEvent`, where available; mock only the network boundary (BFF / api client), never the
+   component under test.
 6. ESM: relative imports end in `.js` in `apps/api`; mocks are `vi.fn()`.
 7. Run the new tests: `pnpm --filter <package> test` (and `test:e2e` when written). Every new test
    must **fail**, and fail because the behavior is missing — not from a syntax, import or setup

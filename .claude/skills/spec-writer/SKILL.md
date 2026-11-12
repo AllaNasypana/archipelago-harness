@@ -79,7 +79,7 @@ missing decision.
 
 | Section       | Content                                                                                                                                                               |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route         | path, route group, Server vs Client parts, redirects                                                                                                                  |
+| Route         | path, route group, Server vs Client parts, redirects; Next.js file conventions cited from its docs (stage-contract step 4)                                            |
 | Components    | tree of `features/<feature>/` by file role (web-patterns §8): components (UI only), hooks, utils, actions, `types.ts`; reused `components/ui` primitives              |
 | Form          | fields, Zod schema mirroring the api rules (cite the api spec and its **Shared vectors** set per field), submit behavior                                              |
 | UI states     | loading, empty, error, success, disabled — what each shows                                                                                                            |

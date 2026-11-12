@@ -338,7 +338,8 @@ story_stages:
 # `inputs` is exactly what the stage's Skill reads, no more and no less: the
 # orchestrator passes these paths, the artifact lists them in front matter and
 # staleness checks them. A Skill that needs another document gets it added
-# here first. Code, tests and generated clients are read freely and not listed.
+# here first. Code, tests, generated clients and installed library docs
+# (apps/web/node_modules/next/dist/docs/) are read freely and not listed.
 # `design_index` is passed to web stories only; it covers the mockup images it
 # lists (docs/design/mockups/), which are read with it and not listed apart.
 # `prd` is context with the lowest precedence (BRD -> epic -> PRD, AGENTS.md
