@@ -18,6 +18,8 @@ You write only `plan.md`; no code.
 
 `story`, `specification` (must be `APPROVED`), the active epic's `decisions.md`. Read the code the
 story touches first: existing modules, components, helpers, tests, Prisma schema, package.json.
+Web: `apps/web/AGENTS.md` and `apps/web/docs/web-patterns.md` bind the plan; every file in
+Changes has one role from §8 "File roles".
 
 ## `plan.md`
 
@@ -30,7 +32,7 @@ story touches first: existing modules, components, helpers, tests, Prisma schema
 
 | # | File (create / modify) | What and why | AC |
 Ordered as the implementor should work: domain → application → infrastructure → presentation for
-api; schema → hooks → components → route → BFF for web. Generated files are listed as
+api; types → utils/schemas → actions → hooks → components → route → BFF for web (web-patterns §8). Generated files are listed as
 "regenerate", never edited.
 
 ## Impact

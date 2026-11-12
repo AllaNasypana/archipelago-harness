@@ -47,6 +47,10 @@ A web story never changes NestJS code or the api contract; a contract gap → `B
 
 Small components with explicit props, hooks with one purpose (`useX`), handlers `handleX`,
 kebab-case files, no `any` or non-null assertions, no abstraction without a second use.
+File roles (web-patterns §8): UI files only render; state, effects and side-effect handlers in
+`hooks/`, pure helpers in `utils/`, Server Functions in `actions/`, types in `types.ts` (only
+`<Component>Props` next to the component); `page.tsx` / `layout.tsx` only compose; other modules
+import the feature through its `index.ts`.
 
 ## `implementation.md`
 

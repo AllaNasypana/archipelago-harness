@@ -2,7 +2,7 @@
 
 How recurring problems are solved in `apps/web`. Read together with [`AGENTS.md`](../AGENTS.md);
 root [`AGENTS.md`](../../../AGENTS.md) wins on conflict. Implementation and review of `web` stories
-check code against this document. Next.js API details: `node_modules/next/dist/docs/01-app/`.
+check code against this document; §8 is the file layout every web story follows. Next.js API details: `node_modules/next/dist/docs/01-app/`.
 
 ## 1. React Compiler
 
@@ -20,6 +20,8 @@ check code against this document. Next.js API details: `node_modules/next/dist/d
 
 `src/proxy.ts` (Next 16 replacement for `middleware.ts`) centralizes redirects:
 
+- no locale prefix → redirect to the same path under `/<cookie locale or en>` (D-01-10); this
+  runs first, and the redirects below work on the locale-stripped path and keep the prefix;
 - no session cookie on a `(protected)` route → redirect to login;
 - session cookie on a login/registration route → redirect into the app.
 
@@ -42,7 +44,7 @@ Use when a dialog should be linkable and close on browser Back (e.g. "Add Contri
 opened from a list). Dialogs that are only a confirmation (archive, delete) stay local state.
 
 ```text
-app/(protected)/goals/
+app/[locale]/(protected)/goals/
 ├── layout.tsx              # renders {children} and {modal}
 ├── page.tsx                # goals list
 ├── [goalId]/page.tsx       # full page: direct link, refresh
@@ -132,3 +134,61 @@ type Result<T> = { ok: true; data: T } | { ok: false; status: number; error: Bff
   `errors.unexpected`, details only in server logs (without tokens or personal data).
 - The NestJS error body itself is defined by `apps/api`; when it changes, only the mapper in
   `lib/api` and its tests change.
+
+## 8. File roles
+
+Each file has one role. UI files render; logic, helpers and types live next to them in files
+named by role. Subfolders are created only when they have a file.
+
+```text
+features/<feature>/
+├── index.ts            # public API: the only import path for app/, proxy.ts and other features
+├── types.ts            # the feature's types and interfaces
+├── constants.ts        # the feature's constants
+├── components/         # UI only (+ <Component>Props next to the component)
+├── hooks/              # use-<name>.ts: client state, effects, handlers with side effects
+├── utils/              # pure functions; server helpers such as resolveLocale(params)
+├── actions/            # Server Functions ('use server')
+└── schemas/            # Zod schemas (§4)
+```
+
+| File                     | Contains                                                                                       | Does not contain                                     |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `page.tsx`, `layout.tsx` | `await params`, one feature helper call, feature components, static markup with message texts   | branching, data mapping, `if (…) notFound()` inline  |
+| component (`.tsx`)       | markup, one hook call (plus context hooks), `<Component>Props`, trivial inline handlers, `map` | `useState`/`useEffect`, async handlers, navigation   |
+| hook (`use-*.ts`)        | state, effects, router, Server Function / query / mutation calls; returns a small typed API    | JSX                                                  |
+| util (`utils/*.ts`)      | pure functions, tested without rendering (ADR-001)                                             | React hooks                                          |
+| `types.ts`               | types and interfaces of the feature                                                            | runtime code                                         |
+
+- Shared code: a hook, type or util used by ≥2 features moves to `src/hooks/`, `src/types/` or
+  `src/lib/utils/` — not before.
+- Naming: `type` by default, `interface` only for a contract meant to be extended; no `I`/`E`
+  prefixes; props types are `<Component>Props`.
+- `index.ts` exports only what other modules use; files inside the feature import each other
+  directly, never through `index.ts`. No `index.ts` inside subfolders.
+- Tests sit next to the file they test (`utils/locale.spec.ts`, `components/locale-toggle.spec.tsx`).
+
+Example — `features/i18n`:
+
+```tsx
+// components/locale-toggle.tsx — UI only
+export function LocaleToggle() {
+  const { label, options, handleSelect } = useLocaleToggle();
+  return (
+    <div role="group" aria-label={label}>
+      {options.map((option) => (
+        <button key={option.locale} aria-pressed={option.isActive} onClick={() => handleSelect(option.locale)}>
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// app/[locale]/page.tsx — composition only
+export default async function Home({ params }: PageProps<'/[locale]'>) {
+  const locale = await resolveLocale(params); // calls notFound() for an unknown locale
+  const { home } = getMessages(locale);
+  return <h2>{home.workspaceSetup}</h2>;
+}
+```

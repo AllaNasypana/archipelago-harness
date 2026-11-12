@@ -18,7 +18,10 @@ are checked against. Follow `docs/workflow/stage-contract.md`.
 
 `story`, `clarification` (must be `APPROVED`), the active epic's `decisions.md`,
 `dependency_spec` (web with `depends_on`), `docs/design/README.md` (web). Read the epic and BRD
-rules the story cites, Accepted ADRs, and the code the story touches.
+rules the story cites (the PRD only for context; precedence BRD → epic → PRD, AGENTS.md §5.1),
+Accepted ADRs, and the code the story touches. Web: `apps/web/AGENTS.md` and
+`apps/web/docs/web-patterns.md` bind the design section; its Components row follows §8 "File
+roles".
 
 The clarification's **Spec checklist** is a to-do list: every item ends up in the spec, or the
 spec says why not.
@@ -74,7 +77,7 @@ missing decision.
 | Section       | Content                                                                                                                                                               |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Route         | path, route group, Server vs Client parts, redirects                                                                                                                  |
-| Components    | tree of feature components in `features/<feature>/`, reused `components/ui` primitives                                                                                |
+| Components    | tree of `features/<feature>/` by file role (web-patterns §8): components (UI only), hooks, utils, actions, `types.ts`; reused `components/ui` primitives          |
 | Form          | fields, Zod schema mirroring the api rules (cite the api spec), submit behavior                                                                                       |
 | UI states     | loading, empty, error, success, disabled — what each shows                                                                                                            |
 | Design        | mockup panels used, design README corrections applied, where epic text overrides; app shell only from `general/` (BRD D17); tokens/classes reused, any new one listed |

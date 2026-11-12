@@ -19,6 +19,8 @@ planned signature that throws `not implemented`), each listed in `tests.md`.
 
 `story`, `specification`, `implementation_plan`. Read existing tests and test setup first
 (`apps/api/vitest*.ts`, `apps/api/test/`, `apps/web/src/test/setup.ts`) and follow their style.
+Web: tests sit next to the file they test and import it at the path the plan gives it under
+`apps/web/docs/web-patterns.md` §8 "File roles"; utils and hooks are tested without rendering.
 
 ## How
 

@@ -79,5 +79,7 @@ What to look at in the diff, residual risks, follow-ups for later stories.
   wrong, failing check, security or readability problem).
 - `BLOCKED` — the environment cannot run the checks.
 
-A failing check or a security problem is always blocking. Readability findings are blocking only
-when they would make the code hard to change; otherwise non-blocking.
+A failing check or a security problem is always blocking. A web file that breaks
+`web-patterns.md` §8 "File roles" (logic in a UI file or page, a type outside `types.ts` other
+than `<Component>Props`, an import past a feature's `index.ts`) is blocking. Other readability
+findings are blocking only when they would make the code hard to change; otherwise non-blocking.
