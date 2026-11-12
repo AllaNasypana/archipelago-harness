@@ -47,8 +47,9 @@ The comment is required. Refuse unless `current_stage` is a human gate.
    and list them. No stage ID → `on_reject`.
 2. `pending_human_gate`: `status: REJECTED`, `decided_at`, `decided_by`, `comment`.
 3. Append `{"verdict":"HUMAN_REJECTED","skill":null,"note":"<comment>",...}`.
-4. Clear `pending_human_gate`, move to the target, `status: IN_PROGRESS`. The target's owner gets
-   the comment on the next `/so:next` and revises its artifact in place (`version + 1`, `DRAFT`),
+4. Set `last_result` (`stage` = the gate, `verdict: HUMAN_REJECTED`, `comment`). Clear
+   `pending_human_gate`, move to the target, `status: IN_PROGRESS`. The target's owner gets
+   the comment as its re-entry on the next `/so:next` and revises its artifact in place (`version + 1`, `DRAFT`),
    so every later gate is passed again.
 
 Both commands invoke no stage Skill and never touch Git. Finish with the Orchestration Result,

@@ -42,6 +42,9 @@ last_result: # null before the first stage
   recorded_at: 2026-11-11T11:00:00Z
   artifacts:
     - { type: specification, path: docs/stories/epic-03/US-03-02-web/spec.md, version: 2 }
+  loop_back_key: null # with CHANGES_REQUIRED: the key from the envelope
+  blocking_issues: [] # with CHANGES_REQUIRED: copied from the envelope (the target's to-do list)
+  comment: null # with HUMAN_APPROVED / HUMAN_REJECTED: the human's comment
 pending_human_gate: null # see below
 blocking_issues: [] # short strings, only when BLOCKED
 non_blocking_findings: 0 # running count for the active story
@@ -78,7 +81,8 @@ pending_human_gate:
    for a `web` story with `depends_on` that story `DONE`, every earlier story in the table `DONE`
    or `DROPPED` (or the human's confirmation), and a clean `apps/` + `packages/` tree.
 3. `PASS` → `next`, `attempt: 1`. `CHANGES_REQUIRED` → the `loop_back` target; `attempt` grows
-   when the same stage repeats. `BLOCKED` → stay, `status: BLOCKED`.
+   when the same stage repeats; `last_result` keeps the key and `blocking_issues` so the target's
+   owner receives them (`stage-contract.md` → Invocation). `BLOCKED` → stay, `status: BLOCKED`.
 4. A gate with `required_when` that does not hold is skipped: one history event with verdict
    `SKIPPED`, then the gate's `on_approve`.
 5. Entering a human gate sets `WAITING_FOR_HUMAN` and fills `pending_human_gate`. `/so:approve`

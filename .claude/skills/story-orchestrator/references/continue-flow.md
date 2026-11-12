@@ -20,8 +20,9 @@ Advance by **at most one** stage.
    - `BACKLOG_SYNC` after a rejection: mode `revise` with the gate's comment as feedback.
    - `CLARIFICATION`: interactive. Refuse in Auto Mode. On a resume, the Skill continues from
      `clarification.md`.
-   - Any stage re-entered by a loop-back or rejection: pass the loop-back key or the human's
-     comment so the owner knows what to fix.
+   - Any stage re-entered by a loop-back or rejection: pass the re-entry (`stage-contract.md` →
+     Invocation): the event's `timestamp` as `at`, its `from_stage`, and `last_result`'s key,
+     artifacts and `blocking_issues`, or its `comment`.
 7. **Apply the envelope** (SKILL.md). Inspect the produced files at their registry paths.
 8. **Record** the transition and append history. If the next stage is a gate, enter it
    (`human-gates.md`). Stop.

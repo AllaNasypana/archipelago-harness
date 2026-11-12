@@ -6,8 +6,10 @@ specific to its stage. Normative routing stays in `stage-map.yaml`.
 ## Invocation
 
 `story-orchestrator` passes: epic, story ID, layer, risk, stage, the resolved input paths, and —
-when the stage was re-entered — the loop-back key or the human's rejection comment. Paths come
-from `artifact-paths.yaml`; never hard-code them.
+when the stage was re-entered — the **re-entry**: `at` (the re-entry event's timestamp), `from`
+(the sending stage), and either the loop-back `key` with the sending artifacts (path, version) and
+`blocking_issues`, or the human's `comment`. Paths come from `artifact-paths.yaml`; never
+hard-code them.
 
 ## Before working
 
@@ -17,8 +19,12 @@ from `artifact-paths.yaml`; never hard-code them.
    it is the reason you run — revise it and record the current input versions.
 2. Read the rules for the layer: `AGENTS.md`, `apps/api/AGENTS.md` or `apps/web/AGENTS.md`, and
    for web `apps/web/docs/web-patterns.md`. Only `Accepted` ADRs bind.
-3. Re-entered? Fix exactly what the key or comment names, revise in place (`version + 1`,
-   `status: DRAFT`), and keep the rest unchanged.
+3. Re-entered? Read the sending artifact and fix exactly what its blocking findings (or the
+   comment) name; keep the rest unchanged. Revise in place (`version + 1`, `status: DRAFT`),
+   append the re-entry to `feedback` (never to `inputs`), and add a **Feedback addressed**
+   section: each blocking finding or comment → what changed, or why not.
+4. Reviewing again (your own artifact exists from an earlier run)? First check every blocking
+   finding of its previous version and mark each `resolved` or `still open` in Findings.
 
 ## While working
 

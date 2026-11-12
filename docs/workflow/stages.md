@@ -194,7 +194,10 @@ frees the workflow for the next `/so:start`.
 | `REVIEW`         | `implementation_issues` / `test_gap` / `plan_gap` / `specification_gap` | `IMPLEMENTATION` / `TEST_FIRST` / `PLANNING` / `SPECIFICATION` |
 | Any human gate   | `/so:reject [stage] <comment>`                                          | `on_reject` or a listed `reject_targets` stage                 |
 
-A revised artifact is `DRAFT` again, so the story passes its gate again. A web story that finds a
+A revised artifact is `DRAFT` again, so the story passes its gate again. The owner records what
+sent it back under `feedback` (never `inputs`, so no staleness cycle with the review) and answers
+each blocking finding in a **Feedback addressed** section; the reviewer re-checks those findings
+first. A web story that finds a
 gap in its api contract does not loop into the api story: it goes `BLOCKED`, and a backlog amend (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web story that depends on it; the blocked story is parked, then dropped.
 
 A stage that runs more than `max_attempts` (3) times in a row is `BLOCKED` until you run

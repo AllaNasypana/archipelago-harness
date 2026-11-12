@@ -50,9 +50,10 @@ Resolve paths from `docs/workflow/artifact-paths.yaml`; the orchestrator passes 
    `BLOCKED`.
 3. If `clarification.md` exists, this is a **resume**: keep answered questions settled and go on
    with open ones. Re-ask a settled one only if new information contradicts it.
-   On a re-entry (the orchestrator passes a loop-back key or a rejection comment), set
-   `interview: in-progress` and `status: DRAFT`, bump `version`, add the comment as a new open
-   question, and close again as in step 5.
+   On a re-entry (the orchestrator passes the re-entry: a loop-back key with the sending
+   artifact, or a rejection comment), set `interview: in-progress` and `status: DRAFT`, bump
+   `version`, append the re-entry to `feedback` (`artifact-schema.md`), add the comment or each
+   blocking finding as a new open question, and close again as in step 5.
 
 ### 2. Write the skeleton first
 

@@ -21,15 +21,24 @@ inputs: # every artifact read, with the version read
   - { path: docs/stories/epic-03/US-03-02-api/story.md, version: 1 }
   - { path: docs/stories/epic-03/US-03-02-api/clarification.md, version: 1 }
   - { path: docs/stories/epic-03/decisions.md, version: 3 }
+feedback: # only after a re-entry; not an input, never checked for staleness
+  - {
+      at: 2026-11-11T10:20:00Z,
+      from: SPEC_REVIEW,
+      key: changes_required,
+      path: docs/stories/epic-03/US-03-02-api/spec-review.md,
+      version: 1,
+    }
 ---
 ```
 
-| Field      | Rule                                                                                                                                                           |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `story`    | Equals `workflow-state.yaml` `story.id`.                                                                                                                       |
-| `version`  | `1` on creation; a run that changes content increments it.                                                                                                     |
-| `status`   | Owners write `DRAFT`; `APPROVED` per `artifact-lifecycle.md` §1.                                                                                               |
-| `inputs[]` | Every workflow artifact read, with its version. A web story lists its dependency's `spec.md`. Project documents (BRD, epic, ADR) are listed without a version. |
+| Field        | Rule                                                                                                                                                                                                                                                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `story`      | Equals `workflow-state.yaml` `story.id`.                                                                                                                                                                                                                                                                                 |
+| `version`    | `1` on creation; a run that changes content increments it.                                                                                                                                                                                                                                                               |
+| `status`     | Owners write `DRAFT`; `APPROVED` per `artifact-lifecycle.md` §1.                                                                                                                                                                                                                                                         |
+| `inputs[]`   | Every workflow artifact read, with its version. A web story lists its dependency's `spec.md`. Project documents (BRD, epic, ADR) are listed without a version. Never a review or a later stage's artifact that sent the work back: that goes to `feedback`.                                                              |
+| `feedback[]` | One entry per loop-back or rejection this artifact has answered, appended, never removed: `at` = `timestamp` of the re-entry event in `history.jsonl`, `from` = the sending stage, then `key` + `path` + `version` of the sending artifact (loop-back) or `comment` (human rejection). Omitted until the first re-entry. |
 
 Review artifacts (`specification_review`, `review`) also carry `verdict:` — the same value as the
 result envelope.

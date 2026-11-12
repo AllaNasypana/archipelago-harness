@@ -34,6 +34,9 @@ Rules:
   stage that consumes it returns `BLOCKED` and names the owner's stage to re-run. A loop-back
   that revises an approved artifact therefore sends the story through that artifact's gate
   again — routing in `stage-map.yaml` already does this.
+- **Feedback is not an input.** What sent the work back (a review, a later stage's artifact, a
+  gate comment) is recorded under `feedback`, never `inputs`, and is not checked for staleness.
+  The sender re-runs after the revision, so as an input each would make the other stale forever.
 - **Frozen dependencies:** an artifact of a story that is `DONE` (e.g. `dependency_spec`) is
   frozen. A consumer checks only that it exists and is `APPROVED`, never its own inputs: later
   epic decisions do not make it stale. A new decision that contradicts it is an api contract gap

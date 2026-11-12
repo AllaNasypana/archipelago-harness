@@ -81,6 +81,8 @@ story.
 | `CHANGES_REQUIRED` | `loop_back_key` exists under `stage.loop_back`               | `loop_back[key]`; `attempt + 1` on a repeat |
 | `BLOCKED`          | `blocking_issues` non-empty                                  | stay; `status: BLOCKED`                     |
 
+- `CHANGES_REQUIRED`: store `loop_back_key` and `blocking_issues` in `last_result`; they are the
+  target owner's to-do list on the next `/so:next`.
 - Unknown key, missing output or unparseable envelope → `BLOCKED`.
 - Findings pointing to several targets → the earliest stage in `story_stage_order`; say why.
 - Never turn `CHANGES_REQUIRED` or `BLOCKED` into progress; never invent a result.
@@ -111,14 +113,13 @@ Before invoking, check whether the stage already has a current output for this s
 for a review, `PASS` for any other output. Revisions are in place: the owner bumps `version` and
 resets `status: DRAFT`.
 
-**Never reuse** when the stage was re-entered by a loop-back or a rejection (the last history
-event is `CHANGES_REQUIRED` or `HUMAN_REJECTED` with this stage as `to_stage`) and the owner has
-not acted on it yet: the inputs did not change, but the owner must act on the key or the comment.
-Run the Skill and pass them.
-
-For an `interactive_skill`, the owner has acted when its output is finished (`clarification.md`
-with `interview: done`, `status: APPROVED`) and its `updated_at` is later than that re-entry
-event: record `PASS` by reuse.
+**Re-entry.** The stage was re-entered when the latest history event with this stage as
+`to_stage`, ignoring `BLOCKED` and `CONTINUED`, is `CHANGES_REQUIRED` or `HUMAN_REJECTED` (so a
+block in between does not lose it). The owner has acted on it only when its artifact
+lists that event under `feedback` (`at` = the event's `timestamp`, `artifact-schema.md`); for an
+`interactive_skill` the output must also be finished (`clarification.md` with `interview: done`,
+`status: APPROVED`). Acted → record `PASS` by reuse. Not acted → never reuse: run the Skill and
+pass the re-entry (`stage-contract.md` → Invocation), built from that event and `last_result`.
 
 ## Recording
 
