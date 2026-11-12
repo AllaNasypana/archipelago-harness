@@ -14,7 +14,7 @@ export function LocaleToggle() {
           lang={option.locale}
           aria-pressed={option.isActive}
           onClick={() => handleSelect(option.locale)}
-          className={`rounded-sm px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          className={`focus-ring rounded-sm px-2 py-1 ${
             option.isActive ? 'font-semibold underline' : 'text-muted-foreground'
           }`}
         >

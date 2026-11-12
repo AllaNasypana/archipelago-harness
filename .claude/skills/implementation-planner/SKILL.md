@@ -19,7 +19,8 @@ You write only `plan.md`; no code.
 `story`, `specification` (must be `APPROVED`), the active epic's `decisions.md`. Read the code the
 story touches first: existing modules, components, helpers, tests, Prisma schema, package.json.
 Web: `apps/web/AGENTS.md` and `apps/web/docs/web-patterns.md` bind the plan; every file in
-Changes has one role from §8 "File roles".
+Changes has one role from §8 "File roles"; a reused style gets its home from §9 "Styles" as a
+Changes row.
 
 ## `plan.md`
 

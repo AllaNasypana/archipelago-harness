@@ -82,7 +82,14 @@ A pattern is used only when it removes real complexity.
 
 ## Styling
 
-- Colors, radii and fonts come only from tokens in `src/styles/theme.css` (shadcn/ui names) via Tailwind utilities — no raw hex values in components. Repeated non-interactive patterns live in `src/styles/components.css` (add a class only after 3+ uses); interactive elements are React components in `src/components/ui`.
+Every reused style has one home (details: [`web-patterns.md` §9](docs/web-patterns.md#9-styles)); a utility set that appears a second time moves there:
+
+- Values (colors, radii, fonts) — tokens in `src/styles/theme.css` (shadcn/ui names) via Tailwind utilities; no raw hex values in components. Text sizes use the Tailwind scale.
+- Small combinable utilities (`focus-ring`, ...) — `@utility` in `src/styles/utilities.css`.
+- Non-interactive markup patterns (`.card`, `.page-title`, `.badge-*`) — `src/styles/components.css`.
+- Interactive elements with variants — React components in `src/components/ui` (variants via `cva`).
+- One-off styles — Tailwind classes in the component's JSX.
+- No `style={{}}`, CSS Modules, `!important` or copied class strings. Conditional classes go through `cn()` (`src/lib/utils/cn.ts`, `clsx` + `tailwind-merge`) once it exists.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

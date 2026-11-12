@@ -1,0 +1,9 @@
+/*
+ * Small reusable utilities that combine with other classes and variants (hover:, md:, ...).
+ * One definition per repeated utility set (2+ uses); see docs/web-patterns.md §9.
+ */
+
+/* Visible keyboard focus for every interactive element (NFR-005, WCAG 2.4.7). */
+@utility focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+}

@@ -50,7 +50,9 @@ kebab-case files, no `any` or non-null assertions, no abstraction without a seco
 File roles (web-patterns §8): UI files only render; state, effects and side-effect handlers in
 `hooks/`, pure helpers in `utils/`, Server Functions in `actions/`, types in `types.ts` (only
 `<Component>Props` next to the component); `page.tsx` / `layout.tsx` only compose; other modules
-import the feature through its `index.ts`.
+import the feature through its `index.ts`. Styles (web-patterns §9): a class set used a second
+time moves to its one home (`theme.css`, `utilities.css`, `components.css` or a `components/ui`
+component), never copied.
 
 ## `implementation.md`
 

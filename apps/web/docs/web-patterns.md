@@ -2,7 +2,7 @@
 
 How recurring problems are solved in `apps/web`. Read together with [`AGENTS.md`](../AGENTS.md);
 root [`AGENTS.md`](../../../AGENTS.md) wins on conflict. Implementation and review of `web` stories
-check code against this document; §8 is the file layout every web story follows. Next.js API details: `node_modules/next/dist/docs/01-app/`.
+check code against this document; §8 is the file layout and §9 the style layout every web story follows. Next.js API details: `node_modules/next/dist/docs/01-app/`.
 
 ## 1. React Compiler
 
@@ -192,3 +192,37 @@ export default async function Home({ params }: PageProps<'/[locale]'>) {
   return <h2>{home.workspaceSetup}</h2>;
 }
 ```
+
+## 9. Styles
+
+Every reused style has exactly one home. A utility set that appears a **second** time moves to
+the home below; it is never copied.
+
+| What repeats                                    | Home                                                | Example                               |
+| ----------------------------------------------- | --------------------------------------------------- | ------------------------------------- |
+| A value: color, radius, font                    | `src/styles/theme.css` (token + `@theme inline`)    | `--primary`, `--radius`               |
+| A small utility that combines with variants     | `src/styles/utilities.css` (`@utility`)             | `focus-ring`                          |
+| A non-interactive markup pattern                | `src/styles/components.css` (`@layer components`)   | `.card`, `.page-title`, `.badge-info` |
+| An interactive element, possibly with variants  | `src/components/ui/<name>.tsx` (variants via `cva`) | `Button variant="ghost"`              |
+| A style used in one component only              | Tailwind classes in that component's JSX            | `flex items-center gap-1`             |
+
+- Text sizes and spacing use the Tailwind scale; no custom typography tokens.
+- Conditional classes: `cn()` from `src/lib/utils/cn.ts` (`clsx` + `tailwind-merge`). It and
+  `class-variance-authority` are added by the first story that creates a `components/ui`
+  component; until then a template string is allowed.
+- Not used: `style={{}}`, CSS Modules, `!important`, raw hex values, `@apply` inside component
+  files.
+- `globals.css` only imports `tailwindcss`, `theme.css`, `utilities.css`, `components.css` and
+  holds `@layer base`.
+
+```css
+/* styles/utilities.css */
+@utility focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+}
+```
+
+```tsx
+<button className={cn('focus-ring rounded-sm px-2 py-1', isActive && 'font-semibold underline')} />
+```
+

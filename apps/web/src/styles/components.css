@@ -1,9 +1,10 @@
 /*
  * Shared style patterns that repeat across many screens.
  *
- * Add a class here only when the same utility set appears in 3+ places and is not
+ * Add a class here when the same utility set appears in 2+ places and is not
  * better expressed as a React component. Interactive elements (buttons, inputs,
  * dialogs, tabs) belong in src/components/ui as components, not here.
+ * Small combinable utilities (focus-ring, ...) live in utilities.css. See docs/web-patterns.md §9.
  */
 
 @layer components {
