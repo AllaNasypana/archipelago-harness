@@ -3,7 +3,7 @@
 Rules for work inside `apps/web`. The root [`AGENTS.md`](../../AGENTS.md) applies as well and wins on conflict.
 The generated Next.js block at the end of this file is tooling guidance about the framework version, not a project rule.
 
-**Patterns:** [`docs/web-patterns.md`](docs/web-patterns.md) is binding for web implementation and review — React Compiler, `proxy.ts`, URL-addressable dialogs, URL filter state, Context, Suspense/transitions, the BFF error format and file roles.
+**Patterns:** [`docs/web-patterns.md`](docs/web-patterns.md) is binding for web implementation and review — React Compiler, `proxy.ts`, URL-addressable dialogs, URL filter state, Context, Suspense/transitions, the BFF error format, file roles, styles and localization.
 
 ## Structure
 

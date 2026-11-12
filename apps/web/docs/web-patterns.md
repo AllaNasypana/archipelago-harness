@@ -2,7 +2,7 @@
 
 How recurring problems are solved in `apps/web`. Read together with [`AGENTS.md`](../AGENTS.md);
 root [`AGENTS.md`](../../../AGENTS.md) wins on conflict. Implementation and review of `web` stories
-check code against this document; §8 is the file layout and §9 the style layout every web story follows. Next.js API details: `node_modules/next/dist/docs/01-app/`.
+check code against this document; §8 is the file layout and §9 the style layout every web story follows. Next.js API details: `apps/web/node_modules/next/dist/docs/01-app/`. §10 is how UI text and the locale work.
 
 ## 1. React Compiler
 
@@ -152,13 +152,13 @@ features/<feature>/
 └── schemas/            # Zod schemas (§4)
 ```
 
-| File                     | Contains                                                                                       | Does not contain                                     |
-| ------------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `page.tsx`, `layout.tsx` | `await params`, one feature helper call, feature components, static markup with message texts   | branching, data mapping, `if (…) notFound()` inline  |
-| component (`.tsx`)       | markup, one hook call (plus context hooks), `<Component>Props`, trivial inline handlers, `map` | `useState`/`useEffect`, async handlers, navigation   |
-| hook (`use-*.ts`)        | state, effects, router, Server Function / query / mutation calls; returns a small typed API    | JSX                                                  |
-| util (`utils/*.ts`)      | pure functions, tested without rendering (ADR-001)                                             | React hooks                                          |
-| `types.ts`               | types and interfaces of the feature                                                            | runtime code                                         |
+| File                     | Contains                                                                                       | Does not contain                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `page.tsx`, `layout.tsx` | `await params`, one feature helper call, feature components, static markup with message texts  | branching, data mapping, `if (…) notFound()` inline |
+| component (`.tsx`)       | markup, one hook call (plus context hooks), `<Component>Props`, trivial inline handlers, `map` | `useState`/`useEffect`, async handlers, navigation  |
+| hook (`use-*.ts`)        | state, effects, router, Server Function / query / mutation calls; returns a small typed API    | JSX                                                 |
+| util (`utils/*.ts`)      | pure functions, tested without rendering (ADR-001)                                             | React hooks                                         |
+| `types.ts`               | types and interfaces of the feature                                                            | runtime code                                        |
 
 - Shared code: a hook, type or util used by ≥2 features moves to `src/hooks/`, `src/types/` or
   `src/lib/utils/` — not before.
@@ -177,7 +177,11 @@ export function LocaleToggle() {
   return (
     <div role="group" aria-label={label}>
       {options.map((option) => (
-        <button key={option.locale} aria-pressed={option.isActive} onClick={() => handleSelect(option.locale)}>
+        <button
+          key={option.locale}
+          aria-pressed={option.isActive}
+          onClick={() => handleSelect(option.locale)}
+        >
           {option.label}
         </button>
       ))}
@@ -198,13 +202,13 @@ export default async function Home({ params }: PageProps<'/[locale]'>) {
 Every reused style has exactly one home. A utility set that appears a **second** time moves to
 the home below; it is never copied.
 
-| What repeats                                    | Home                                                | Example                               |
-| ----------------------------------------------- | --------------------------------------------------- | ------------------------------------- |
-| A value: color, radius, font                    | `src/styles/theme.css` (token + `@theme inline`)    | `--primary`, `--radius`               |
-| A small utility that combines with variants     | `src/styles/utilities.css` (`@utility`)             | `focus-ring`                          |
-| A non-interactive markup pattern                | `src/styles/components.css` (`@layer components`)   | `.card`, `.page-title`, `.badge-info` |
-| An interactive element, possibly with variants  | `src/components/ui/<name>.tsx` (variants via `cva`) | `Button variant="ghost"`              |
-| A style used in one component only              | Tailwind classes in that component's JSX            | `flex items-center gap-1`             |
+| What repeats                                   | Home                                                | Example                               |
+| ---------------------------------------------- | --------------------------------------------------- | ------------------------------------- |
+| A value: color, radius, font                   | `src/styles/theme.css` (token + `@theme inline`)    | `--primary`, `--radius`               |
+| A small utility that combines with variants    | `src/styles/utilities.css` (`@utility`)             | `focus-ring`                          |
+| A non-interactive markup pattern               | `src/styles/components.css` (`@layer components`)   | `.card`, `.page-title`, `.badge-info` |
+| An interactive element, possibly with variants | `src/components/ui/<name>.tsx` (variants via `cva`) | `Button variant="ghost"`              |
+| A style used in one component only             | Tailwind classes in that component's JSX            | `flex items-center gap-1`             |
 
 - Text sizes and spacing use the Tailwind scale; no custom typography tokens.
 - Conditional classes: `cn()` from `src/lib/utils/cn.ts` (`clsx` + `tailwind-merge`). It and
@@ -226,3 +230,35 @@ the home below; it is never copied.
 <button className={cn('focus-ring rounded-sm px-2 py-1', isActive && 'font-semibold underline')} />
 ```
 
+## 10. Localization
+
+Settled in EPIC-01 (D-01-10, US-00-01-web). Code: `src/features/i18n`, imported through its
+`index.ts`.
+
+**Locale in the URL.** Every UI route lives under `app/[locale]/` (`/en/...`, `/uk/...`). Links,
+redirects and `returnTo` keep the current prefix. BFF route handlers under `app/api` are not
+localized.
+
+| Situation                   | Behavior                                                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| URL without a locale prefix | `proxy.ts` redirects (307) to the same path under the `locale` cookie's locale, else `/en`; this runs before any session redirect (§2)                                                           |
+| First visit                 | `en`; no browser-language detection (a per-account preference is EPIC-09)                                                                                                                        |
+| Unknown `[locale]` segment  | `resolveLocale(params)` calls `notFound()`; the 404 is `app/global-not-found.tsx` (`experimental.globalNotFound`: `dynamicParams` is not available with `cacheComponents`), rendered in `en`     |
+| EN / УКР toggle             | `LocaleToggle` → `useLocaleToggle`: the Server Function `setLocaleCookie` writes the cookie (1 year, `sameSite: lax`), then a client navigation swaps the prefix; typed form values are not kept |
+| `<html lang>` and metadata  | From the route locale: `[locale]/layout.tsx` and `getLocaleMetadata`                                                                                                                             |
+
+**Messages.** No i18n library: hand-written JSON dictionaries `messages/en.json` and
+`messages/uk.json`, nested by namespace (`common`, `home`, `localeToggle`, `notFound`, …).
+
+- `en` is the source of the type: `Messages = typeof en`; `uk` is `DeepPartial<Messages>` and
+  falls back to `en` per key at runtime (`getMessages(locale)`).
+- A strict parity test fails when a key exists in one file only, so the fallback never ships.
+- A new UI string adds the key to **both** files in the same change, with real `uk` text.
+- Server Components call `getMessages(locale)`; Client Components read `useI18n()` from the one
+  i18n Provider in `[locale]/layout.tsx` (§5).
+- API error codes map to `errors.<code>` keys (§7).
+- Not decided yet (AGENTS.md §5): locale-aware date, number and plural formatting. A story that
+  needs it proposes an ADR (e.g. `Intl` vs `next-intl`) and keeps the key structure.
+
+**Proxy matcher.** `['/((?!api|_next|.*\\..*).*)']`: page routes only, no BFF, Next internals or
+files with an extension.

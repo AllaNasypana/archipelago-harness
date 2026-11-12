@@ -22,7 +22,8 @@ vector sets), `dependency_spec` (web with `depends_on`: the api errors to mock a
 boundary and the vector sets to import). Read existing tests and
 test setup first
 (`apps/api/vitest*.ts`, `apps/api/test/`, `apps/web/src/test/setup.ts`) and follow their style.
-Api: `apps/api/AGENTS.md` (ESM `.js` imports, Vitest `vi.fn()`); tests import a module through
+Api: `apps/api/AGENTS.md` (ESM `.js` imports, Vitest `vi.fn()`) and `apps/api/docs/api-patterns.md`
+§3 (`*.spec.ts` / `*.int-spec.ts` / `test/*.e2e-spec.ts`); tests import a module through
 the same public surface other code uses. Web: tests sit next to the file they test and import it
 at the path the plan gives it under `apps/web/docs/web-patterns.md` §8 "File roles"; utils and
 hooks are tested without rendering.

@@ -10,8 +10,9 @@ argument-hint: <StoryId>
 # Nest Implementor
 
 Green: make the failing tests pass with the simplest code that meets the spec and the plan.
-Follow `docs/workflow/stage-contract.md`, `AGENTS.md` and `apps/api/AGENTS.md` (structure,
-backend rules, ESM notes).
+Follow `docs/workflow/stage-contract.md`, `AGENTS.md`, `apps/api/AGENTS.md` (structure, backend
+rules, ESM notes) and `apps/api/docs/api-patterns.md` (Unit of Work, configuration, test levels) —
+all binding.
 
 ## Inputs
 

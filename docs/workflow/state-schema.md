@@ -97,7 +97,8 @@ pending_human_gate:
 
 ## `history.jsonl`
 
-One JSON object per line, append-only, never rewritten.
+One JSON object per line, append-only, never rewritten — except an epic restart the human orders
+(`epic-flow.md` → Restarting an epic).
 
 ```json
 {

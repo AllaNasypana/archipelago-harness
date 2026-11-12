@@ -13,21 +13,21 @@ does the same way (inputs, re-entry, output, result) is in [`stage-contract.md`]
 
 ## Sources every stage reads
 
-| Source                                                                                                              | Role                                                                                                                                                                |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` + `layer_rules` (api: `apps/api/AGENTS.md`; web: `apps/web/AGENTS.md`, `apps/web/docs/web-patterns.md`) | Architecture boundaries, coding, testing, security; registry keys, so every stage lists them in `inputs`                                                            |
-| `docs/product/archipelago-business-requirements.md` (BRD)                                                           | Wins on conflict; FR/BR/NFR IDs for traceability                                                                                                                    |
-| `docs/epics/EPIC-<nn>_*.md`                                                                                         | Approved epic: flows, rules, AC IDs; wins over mockups                                                                                                              |
-| `docs/product/Archipelago_PRD_v1.2.md`                                                                              | Product scope, lowest precedence; read by `BACKLOG_SYNC`, `CLARIFICATION`, `SPECIFICATION`, `SPEC_REVIEW`. A contradiction is recorded as "PRD drift", never blocks |
-| `docs/design/README.md` + mockups                                                                                   | Visual references, app-shell rule, per-set corrections                                                                                                              |
-| `docs/adr/`                                                                                                         | Only `Accepted` ADRs bind                                                                                                                                           |
+| Source                                                                                                                                               | Role                                                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` + `layer_rules` (api: `apps/api/AGENTS.md`, `apps/api/docs/api-patterns.md`; web: `apps/web/AGENTS.md`, `apps/web/docs/web-patterns.md`) | Architecture boundaries, coding, testing, security; registry keys, so every stage lists them in `inputs`                                                            |
+| `docs/product/archipelago-business-requirements.md` (BRD)                                                                                            | Wins on conflict; FR/BR/NFR IDs for traceability                                                                                                                    |
+| `docs/epics/EPIC-<nn>_*.md`                                                                                                                          | Approved epic: flows, rules, AC IDs; wins over mockups                                                                                                              |
+| `docs/product/Archipelago_PRD_v1.2.md`                                                                                                               | Product scope, lowest precedence; read by `BACKLOG_SYNC`, `CLARIFICATION`, `SPECIFICATION`, `SPEC_REVIEW`. A contradiction is recorded as "PRD drift", never blocks |
+| `docs/design/README.md` + mockups                                                                                                                    | Visual references, app-shell rule, per-set corrections                                                                                                              |
+| `docs/adr/`                                                                                                                                          | Only `Accepted` ADRs bind                                                                                                                                           |
 
 ## At a glance
 
 ```text
 /so:epic EPIC-03
   BACKLOG_SYNC ─▶ HUMAN_BACKLOG_APPROVAL                      once per epic
-/so:start US-03-02-api   (then /so:next … /so:approve)
+/so:start US-03-02-api   (then /so:run; /so:approve at each gate; /so:run again)
   CLARIFICATION ─▶ SPECIFICATION ─▶ SPEC_REVIEW ─▶ HUMAN_SPEC_APPROVAL
   ─▶ PLANNING ─▶ HUMAN_PLAN_APPROVAL (risk: high only)
   ─▶ TEST_FIRST ─▶ IMPLEMENTATION ─▶ REVIEW ─▶ HUMAN_ACCEPTANCE ─▶ DONE
@@ -181,7 +181,18 @@ verbatim, then reviews in three parts:
 - **readability** — the code quality bar below.
 
 You then read the diff and `review.md` and accept the story. `DONE` marks it in `backlog.md` and
-frees the workflow for the next `/so:start`.
+frees the workflow for the next `/so:start`. Approval also applies the review's **Promote**
+items (conventions later stories must follow go to `apps/<layer>/docs/<layer>-patterns.md` or
+`AGENTS.md`) and makes one commit for the story on the current branch.
+
+## Running the flow
+
+`/so:run` drives a story from where it stands to the next point that needs you: a human gate,
+the `CLARIFICATION` interview (it runs in your session, then the run continues), a block, an
+attempt limit, or 12 stages. Every automated stage runs in a fresh subagent, so stages never share
+working context, and the orchestrator keeps only the one-line results. Everything lives on disk:
+you may `/clear` at any gate and continue with `/so:run`. `/so:next` does exactly one stage, for
+debugging the flow.
 
 ## Loop-backs and rejections
 
@@ -249,13 +260,13 @@ generated client drift, `en`/`uk` key completeness, Playwright e2e (ADR-001).
 
 ## Decisions and open questions
 
-| ID   | Topic                 | Status      | Decision                                                                                                                                                                                          |
-| ---- | --------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OQ-1 | Story source          | **decided** | `BACKLOG_SYNC` cuts the active epic into stories under `docs/stories/epic-<nn>/` (user, 2026-11-11)                                                                                               |
-| OQ-2 | Design stages         | **decided** | Design is a section of `spec.md` per layer; replaces the separate `UI_DESIGN` stage (user, 2026-11-11)                                                                                            |
-| OQ-3 | Implementor           | **decided** | One `IMPLEMENTATION` stage, Skill chosen by `layer` (user, 2026-11-09)                                                                                                                            |
-| OQ-4 | Web test runner / e2e | **decided** | Vitest + Testing Library; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md)                                                                                            |
-| OQ-5 | Command prefix        | **decided** | `/so:` (user, 2026-11-09)                                                                                                                                                                         |
-| OQ-6 | Story ID format       | **decided** | `US-<epic>-<nn>-<layer>` (user, 2026-11-09)                                                                                                                                                       |
-| OQ-7 | Workflow size         | **decided** | Compact flow, plan gate for `risk: high` only (user, 2026-11-11)                                                                                                                                  |
-| OQ-8 | Git after acceptance  | open        | What happens in Git when a story is accepted; to decide later (user, 2026-11-11). Until then `/so:start` needs a clean `apps/` + `packages/` tree, so the human commits or stashes accepted work. |
+| ID   | Topic                 | Status      | Decision                                                                                                                                                  |
+| ---- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OQ-1 | Story source          | **decided** | `BACKLOG_SYNC` cuts the active epic into stories under `docs/stories/epic-<nn>/` (user, 2026-11-11)                                                       |
+| OQ-2 | Design stages         | **decided** | Design is a section of `spec.md` per layer; replaces the separate `UI_DESIGN` stage (user, 2026-11-11)                                                    |
+| OQ-3 | Implementor           | **decided** | One `IMPLEMENTATION` stage, Skill chosen by `layer` (user, 2026-11-09)                                                                                    |
+| OQ-4 | Web test runner / e2e | **decided** | Vitest + Testing Library; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md)                                                    |
+| OQ-5 | Command prefix        | **decided** | `/so:` (user, 2026-11-09)                                                                                                                                 |
+| OQ-6 | Story ID format       | **decided** | `US-<epic>-<nn>-<layer>` (user, 2026-11-09)                                                                                                               |
+| OQ-7 | Workflow size         | **decided** | Compact flow, plan gate for `risk: high` only (user, 2026-11-11)                                                                                          |
+| OQ-8 | Git after acceptance  | **decided** | `/so:approve` at `HUMAN_ACCEPTANCE` makes one commit per story on the current branch, never on `main`; push and PR stay with the human (user, 2026-11-12) |

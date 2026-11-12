@@ -56,6 +56,24 @@ would block the next `/so:start` (clean tree): ask the human to stash them
 (`git stash push -u -m "<StoryId> parked" -- apps packages`) and put the stash name in the
 `PARKED` note; never stash or discard yourself.
 
+## Restarting an epic
+
+Only on the human's explicit instruction (e.g. after the harness changed): re-slice an epic whose
+backlog was approved, keeping delivered work.
+
+1. No active story (park a `BLOCKED` one first).
+2. Keep `DONE` / `DROPPED` rows and their `story.md`. Every other story goes back to `PROPOSED`
+   and its `story.md` is removed (`git rm`); artifacts of `DONE` stories may be removed only if
+   no unfinished story depends on them (`artifact-lifecycle.md` §1). Agreements in removed
+   artifacts that later stories need are promoted to the pattern files or an ADR first.
+3. `backlog.md`: `version + 1`, `status: DRAFT`, a short "Re-slice pending" note.
+4. `history.jsonl` may start fresh (the old one stays in Git; name its commit in the first note):
+   `EPIC_ACTIVATED` to `HUMAN_BACKLOG_APPROVAL`, then `HUMAN_REJECTED` to `BACKLOG_SYNC` with the
+   human's re-slice feedback as `note`. This is the one exception to append-only.
+5. State: `epic.status: BACKLOG`, `current_stage: BACKLOG_SYNC`, `status: IN_PROGRESS`,
+   `last_result` = that rejection with the feedback as `comment`. The next `/so:run` runs
+   `backlog-sync` in `revise` mode.
+
 ## Epic done
 
 When `DONE` is reached for a story and every story in the backlog is `DONE` or `DROPPED`, set

@@ -3,16 +3,25 @@
 version: 2
 epic:
   id: EPIC-01
-  status: IN_DELIVERY
+  status: BACKLOG
   backlog: docs/stories/epic-01/backlog.md
-  activated_at: 2026-11-11T12:49:05Z
+  activated_at: 2026-11-12T11:43:54Z
 story: null
-status: IDLE
-current_stage: null
-previous_stage: null
+status: IN_PROGRESS
+current_stage: BACKLOG_SYNC
+previous_stage: HUMAN_BACKLOG_APPROVAL
 attempt: 1
-last_result: null
+last_result:
+  stage: HUMAN_BACKLOG_APPROVAL
+  verdict: HUMAN_REJECTED
+  recorded_at: 2026-11-12T11:43:54Z
+  artifacts:
+    - { type: backlog, path: docs/stories/epic-01/backlog.md, version: 2 }
+  loop_back_key: null
+  blocking_issues: []
+  comment: >-
+    Re-slice EPIC-01 under the revised harness. Keep US-00-01-api and US-00-01-web as DONE rows, unchanged. Write every other story anew (their story.md files were removed on purpose); keep an ID when the story keeps its scope, never reuse a dropped ID. Apply: layer_rules incl. apps/api/docs/api-patterns.md and apps/web/docs/web-patterns.md §10 (no story re-decides what they settle); ADR-004 (an api story whose rule a web form mirrors owns its vector set); PRD scope and PRD drift notes; api-patterns §4 conventions not decided (API error format, ID strategy, ...) under Open questions as 'needs an ADR' with the first story that needs each; carry-overs per decisions.md (D-01-01, D-01-02, D-01-09).
 pending_human_gate: null
 blocking_issues: []
 non_blocking_findings: 0
-updated_at: 2026-11-12T10:13:14Z
+updated_at: 2026-11-12T11:43:54Z

@@ -19,7 +19,7 @@ hard-code them.
    block: it is the reason you run — revise it, or only refresh `inputs` if the change does not
    affect it, and record the current versions and commits.
 2. Read the rules: `agents_rules` (`AGENTS.md`) and every file of `layer_rules` for the story's
-   layer (`artifact-paths.yaml`: api → `apps/api/AGENTS.md`; web → `apps/web/AGENTS.md`,
+   layer (`artifact-paths.yaml`: api → `apps/api/AGENTS.md`, `apps/api/docs/api-patterns.md`; web → `apps/web/AGENTS.md`,
    `apps/web/docs/web-patterns.md`). They bind your artifact; list each in `inputs`. Only
    `Accepted` ADRs bind.
 3. Re-entered? Read the sending artifact and fix exactly what its blocking findings (or the

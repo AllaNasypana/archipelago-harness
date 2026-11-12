@@ -68,6 +68,13 @@ PASS | CHANGES_REQUIRED | BLOCKED — one sentence.
 
 | # | Severity | Part | File:line | Finding | Fix |
 
+## Promote
+
+Conventions this story settled that later stories must follow (a pattern, a test level, a config
+rule), each as: `P<n>` — target file and section — exact text to insert. "None" if none. A
+project-wide convention that needs an ADR goes under "For the human" as an ADR to propose, not
+here. Approving the story applies these verbatim (`human-gates.md`).
+
 ## For the human
 
 What to look at in the diff, residual risks, follow-ups for later stories.

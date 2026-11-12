@@ -313,8 +313,9 @@ story_stages:
     type: human_gate
     required_artifacts: [review]
     meaning: >
-      A human reviews the diff and the review and accepts the story. What
-      happens in Git afterwards is open (stages.md, OQ-8).
+      A human reviews the diff and the review and accepts the story. Approval
+      applies the review's Promote items, marks the story DONE and makes one
+      commit on the current branch (never the default branch).
     on_approve: DONE
     on_reject: IMPLEMENTATION
     reject_targets: [SPECIFICATION, PLANNING, TEST_FIRST, IMPLEMENTATION]

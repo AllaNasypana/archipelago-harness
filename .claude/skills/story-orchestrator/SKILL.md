@@ -3,11 +3,11 @@ name: story-orchestrator
 description: >
   Coordinates Archipelago's epic-delivery workflow: activates an epic and runs its BACKLOG_SYNC,
   activates one story at a time, routes the active stage to exactly one Skill (the api or web
-  implementor by layer), records each transition, and stops at every human gate. Modes: epic,
-  start, continue, status, gate decisions. Use for /so:epic, /so:start, /so:next, /so:status,
-  /so:approve, /so:reject, or whenever someone asks to start, resume, inspect, approve or reject
-  workflow work.
-argument-hint: <epic|start|continue|status|approve|reject> [Epic|StoryId|comment]
+  implementor by layer) in a fresh subagent, records each transition, and stops at every human
+  gate; commits an accepted story. Modes: epic, start, run, continue, status, gate decisions. Use
+  for /so:epic, /so:start, /so:run, /so:next, /so:status, /so:approve, /so:reject, or whenever
+  someone asks to start, run, resume, inspect, approve or reject workflow work.
+argument-hint: <epic|start|run|continue|status|approve|reject> [Epic|StoryId|comment]
 ---
 
 # Story Orchestrator
@@ -41,15 +41,17 @@ Load only the reference for the requested mode. Default is `continue`.
 | ------------- | --------------------------- | ----------------------------- |
 | `epic`        | `/so:epic <Epic>`           | `references/epic-flow.md`     |
 | `start`       | `/so:start <StoryId>`       | `references/start-flow.md`    |
+| `run`         | `/so:run`                   | `references/run-flow.md`      |
 | `continue`    | `/so:next`                  | `references/continue-flow.md` |
 | `status`      | `/so:status`                | `references/status-flow.md`   |
 | gate decision | `/so:approve`, `/so:reject` | `references/human-gates.md`   |
 
 ## Single-step rule
 
-One call performs **at most one** stage: resolve state → check invariants → invoke one Skill or
-stop at a gate → read its result envelope → record → report. Never chain stages or run a story to
-the end. Two exceptions record two events in one call, because no work happens between them:
+A **step** performs at most one stage: resolve state → check invariants → invoke one Skill or
+stop at a gate → read its result envelope → record → report. `/so:next` is one step; `/so:run`
+repeats steps (`run-flow.md`), recording each before the next and re-reading state from disk, and
+stops wherever a human is needed. Never invoke two stage Skills in one step. Two exceptions record two events in one call, because no work happens between them:
 skipping a gate whose `required_when` does not hold, and an epic becoming `DONE` with its last
 story.
 
@@ -62,13 +64,14 @@ story.
    list for `story.layer` (both lists at `BACKLOG_SYNC`). `design_index` is skipped for `api`
    stories.
 4. Invoke by stage type:
-   - `automated_skill` — run the Skill with: epic, story ID, layer, risk, stage, resolved input
-     paths, and the instruction to stay in its responsibility and return the result envelope.
-     Do not paste artifact bodies.
-   - `fresh_context: true` — run it in a subagent (Agent tool) that loads the Skill, so the
-     reviewer has not seen the work being written. Pass the same data.
+   - `automated_skill` — always in a fresh subagent (Agent tool) with the prompt in
+     `run-flow.md`: epic, story ID, layer, risk, stage, resolved input paths, the re-entry, and
+     the instruction to stay in its stage and return the result envelope. Never paste artifact
+     bodies. `fresh_context: true` in `stage-map.yaml` marks the reviewers, for whom this
+     independence is a requirement, not a preference.
    - `interactive_skill` — hand the conversation to the Skill in this session; it talks to the
-     human across turns and ends by telling them to run `/so:next`. That next call finds
+     human across turns. Under `/so:run` its envelope is recorded and the run continues; under
+     `/so:next` it ends by telling the human to run `/so:next`, and that next call finds
      `clarification.md` with `interview: done`, `status: APPROVED` and current inputs and records
      `PASS` by reuse; a `BLOCKED` envelope is recorded when the Skill returns it. Never in Auto
      Mode.
@@ -148,9 +151,11 @@ reset the story as `DONE` does (`state-schema.md` rule 8) without marking it `DO
 ## Boundaries
 
 Never: pass or infer a human gate (a review `PASS` is not approval); resolve decisions; change
-requirements; do stage work; invoke more than one stage Skill per call; delete or move
-artifacts or history; commit, push, branch or open PRs (Git after acceptance is open, OQ-8); run
-destructive database commands; bypass hooks; log secrets. Auto Mode never passes a gate and
+requirements; do stage work (except applying the review's human-approved **Promote** text
+verbatim at acceptance, `human-gates.md`); invoke more than one stage Skill per step; delete or
+move artifacts or history; commit anything but the one accepted-story commit (`human-gates.md`);
+push, branch or open PRs; commit on the default branch; run destructive database commands; bypass
+hooks (`--no-verify`); log secrets. Auto Mode never passes a gate and
 never runs `CLARIFICATION`.
 
 ## Orchestration Result

@@ -28,7 +28,7 @@ version: 2
 project_documents:
   agents_rules: AGENTS.md
   layer_rules: # resolved by story.layer; an epic stage gets both lists
-    api: [apps/api/AGENTS.md]
+    api: [apps/api/AGENTS.md, apps/api/docs/api-patterns.md]
     web: [apps/web/AGENTS.md, apps/web/docs/web-patterns.md]
   brd: docs/product/archipelago-business-requirements.md
   prd: docs/product/Archipelago_PRD_v1.2.md

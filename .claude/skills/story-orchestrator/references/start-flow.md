@@ -14,8 +14,8 @@ Activate one story. Runs no stage.
   how foundation stories come first). Otherwise list them and ask the human to confirm starting
   out of order (never in Auto Mode); record the confirmation in the `ACTIVATED` event's `note`.
 - Clean code tree: `git status --porcelain -- apps packages` is empty, so `base_commit` diffs
-  only this story. Otherwise stop: the human commits or stashes that work first (how accepted
-  work reaches Git is OQ-8).
+  only this story. Accepted stories are committed by `/so:approve` (`human-gates.md`); anything
+  left is unfinished work: stop, the human commits or stashes it first.
 
 ## Steps
 

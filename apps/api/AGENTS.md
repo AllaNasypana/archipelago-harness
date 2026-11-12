@@ -2,6 +2,8 @@
 
 Rules for work inside `apps/api`. The root [`AGENTS.md`](../../AGENTS.md) applies as well and wins on conflict.
 
+**Patterns:** [`docs/api-patterns.md`](docs/api-patterns.md) is binding for api implementation and review — Unit of Work and transactions, configuration and startup, test levels and files, conventions not decided yet.
+
 ## Structure
 
 Target guideline: create a directory only when a use case needs it.

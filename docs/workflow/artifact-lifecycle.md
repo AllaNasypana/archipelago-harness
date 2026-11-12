@@ -50,7 +50,8 @@ Rules:
 - **Frozen dependencies:** an artifact of a story that is `DONE` (e.g. `dependency_spec`) is
   frozen. A consumer checks only that it exists and is `APPROVED`, never its own inputs: later
   epic decisions do not make it stale. A new decision that contradicts it is an api contract gap
-  (`stage-map.yaml` → `web_depends_on_api`), not staleness.
+  (`stage-map.yaml` → `web_depends_on_api`), not staleness. A `DONE` story's artifacts are not
+  deleted while a story that is not `DONE` depends on it (`depends_on`).
 
 ---
 

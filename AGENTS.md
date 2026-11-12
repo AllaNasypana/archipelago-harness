@@ -93,6 +93,7 @@ Commands (repository root; Turborepo runs them per package, `--filter <package>`
 | --------------------------------------------------- | -------------------------------------------------------- |
 | Lint / typecheck / unit + integration tests / build | `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` |
 | Local PostgreSQL + Mailpit                          | `pnpm db:up` (`db:down`, `db:reset`)                     |
+| API integration tests (`*.int-spec.ts`, needs DB)   | `pnpm --filter @archipelago/api test:int`                |
 | API e2e tests                                       | `pnpm --filter @archipelago/api test:e2e`                |
 | Prisma client                                       | `pnpm --filter @archipelago/api prisma:generate`         |
 
@@ -116,7 +117,9 @@ Commands (repository root; Turborepo runs them per package, `--filter <package>`
 
 ## 8. Agent Workflow & Definition of Done
 
-**Delivery harness.** Feature work goes through the workflow in `docs/workflow/`: `stage-map.yaml` (stages, routing, gates — normative), `artifact-paths.yaml` (where artifacts live, who writes them), `artifact-lifecycle.md`, `artifact-schema.md`, `state-schema.md`; `stages.md` explains them. One epic at a time is cut into small single-layer (`api` or `web`) stories under `docs/stories/epic-<nn>/`; one story at a time goes from an interactive clarification to human acceptance. Skills live in `.claude/skills/`, commands in `.claude/commands/so/` (`/so:epic`, `/so:start`, `/so:next`, `/so:status`, `/so:approve`, `/so:reject`). Only `story-orchestrator` writes workflow state; a review `PASS` is never human approval.
+**Delivery harness.** Feature work goes through the workflow in `docs/workflow/`: `stage-map.yaml` (stages, routing, gates — normative), `artifact-paths.yaml` (where artifacts live, who writes them), `artifact-lifecycle.md`, `artifact-schema.md`, `state-schema.md`; `stages.md` explains them. One epic at a time is cut into small single-layer (`api` or `web`) stories under `docs/stories/epic-<nn>/`; one story at a time goes from an interactive clarification to human acceptance. Skills live in `.claude/skills/`, commands in `.claude/commands/so/` (`/so:epic`, `/so:start`, `/so:run`, `/so:next`, `/so:status`, `/so:approve`, `/so:reject`). `/so:run` drives the story stage by stage, each in a fresh subagent, and stops only where a human is needed; `/so:next` does one stage. Only `story-orchestrator` writes workflow state and commits (one commit per accepted story, current branch); a review `PASS` is never human approval.
+
+**Promoting agreements.** A convention a story settles that later stories must follow (a pattern, a test level, a config rule) moves into `apps/<layer>/docs/<layer>-patterns.md`, this file or an ADR at that story's `HUMAN_ACCEPTANCE`; story artifacts are working files, not the place future work looks for rules.
 
 1. Before making changes, read relevant `AGENTS.md` files, ADRs, task acceptance criteria, and existing implementations.
 2. If a decision is unapproved or requirements conflict, present options and request approval; do not invent architectural decisions.
@@ -137,6 +140,7 @@ Commands (repository root; Turborepo runs them per package, `--filter <package>`
 ## 10. Reference Documents
 
 - Product: BRD, PRD v1.2, `docs/epics/` (§5.1); design: `docs/design/README.md`.
+- Established patterns: `apps/api/docs/api-patterns.md`, `apps/web/docs/web-patterns.md`.
 - Architecture decisions: `docs/adr/` (only `Accepted` ADRs are binding; `Proposed` ones need approval before implementation), `docs/architecture/`.
 - Delivery workflow: `docs/workflow/`; stories: `docs/stories/`; operations: `docs/runbooks/`.
 - If a referenced document does not exist, report its absence instead of assuming its content.

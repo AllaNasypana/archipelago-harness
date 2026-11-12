@@ -4,7 +4,7 @@ description: >
   Interviews the human to clarify the active Archipelago user story (api or web layer) before
   its specification, and records every question, answer, decision and assumption in the story's
   clarification.md, epic-wide answers in the epic's decisions.md. Owns the interactive
-  CLARIFICATION stage. Invoked by story-orchestrator on /so:next at CLARIFICATION, or when
+  CLARIFICATION stage. Invoked by story-orchestrator on /so:run or /so:next at CLARIFICATION, or when
   someone asks to clarify, refine or stress-test a story ("уточнимо US-01-03-api", "що
   незрозуміло в цій сторі"). Requires a live human; never runs in Auto Mode or CI.
 argument-hint: <StoryId, e.g. US-03-02-api>
@@ -114,7 +114,7 @@ answers. If nothing converges after several rounds, say that something foundatio
 5. On "yes": apply the story changes to `story.md` (bump its `version`), set `interview: done` and
    `status: APPROVED` in `clarification.md`, and update its `inputs` to the versions of `story.md`
    and `decisions.md` **after** your own edits, so your output is not stale. Return `PASS` and tell
-   the human to run `/so:next`. A proposed split is not applied:
+   the human to run `/so:next` (under `/so:run` the run continues by itself). A proposed split is not applied:
    return `BLOCKED` and name it, because the backlog must change first
    (`/so:epic <Epic> <split feedback>` parks this story and amends the backlog).
 
@@ -126,7 +126,7 @@ Return the envelope from `docs/workflow/artifact-lifecycle.md` §2 with `stage: 
 - `BLOCKED` — no confirmation, a blocking question deferred, a needed ADR, an api contract gap
   (web), or a proposed split. Name each in `blocking_issues`.
 
-An interrupted interview returns nothing; the next `/so:next` resumes from the file.
+An interrupted interview returns nothing; the next `/so:run` or `/so:next` resumes from the file.
 
 ## Rules of thumb
 
