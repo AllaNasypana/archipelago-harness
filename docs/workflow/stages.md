@@ -65,15 +65,17 @@ archive) or by data role (write / read).
 
 **One layer per story:**
 
-| `layer` | Scope                                                                                                   | Never contains                    |
-| ------- | ------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `api`   | `apps/api`: domain, use cases, Prisma `app`, REST endpoints with Swagger decorators, regenerated client | Pages, components, BFF handlers   |
-| `web`   | `apps/web`: pages, components, forms, hooks, BFF route handlers, `bff` schema, `en`/`uk` strings        | NestJS code, `app` schema changes |
+| `layer` | Scope                                                                                                                                        | Never contains                    |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `api`   | `apps/api`: domain, use cases, Prisma `app`, REST endpoints with Swagger decorators, regenerated client, shared validation vectors (ADR-004) | Pages, components, BFF handlers   |
+| `web`   | `apps/web`: pages, components, forms, hooks, BFF route handlers, `bff` schema, `en`/`uk` strings                                             | NestJS code, `app` schema changes |
 
 - A user-facing capability is usually a pair, `US-03-02-api` then `US-03-02-web`.
 - The web story names the api story in `depends_on` and starts only when it is `DONE`. OpenAPI is
   generated from NestJS code, so the contract is the merged endpoint plus the regenerated
-  `packages/api-client`.
+  `packages/api-client` and the shared validation vectors the web form imports (ADR-004).
+- Every web stage from `CLARIFICATION` to `REVIEW` reads the api story's `spec.md`
+  (`dependency_spec`).
 - Pure backend work (outbox) and pure UI work (app shell) are single stories.
 - Foundation work no epic owns gets a `US-00` ID, lives in `epic-00/` and is delivered inside
   the epic that first needs it.

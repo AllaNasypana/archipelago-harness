@@ -17,7 +17,8 @@ code principles", "Styling") and `apps/web/docs/web-patterns.md` — all binding
 ## Inputs
 
 `story`, `specification`, `implementation_plan`, `test_report`, the active epic's `decisions.md`,
-and the api dependency's `spec.md`. This Next.js version differs from older ones: read the
+and `dependency_spec` (the api story's `spec.md`: calls, errors, shared vector sets). This
+Next.js version differs from older ones: read the
 relevant guide in `node_modules/next/dist/docs/` before using an API you are unsure of.
 
 ## How

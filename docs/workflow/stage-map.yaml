@@ -47,14 +47,17 @@ story_rules:
   layers:
     api: >
       apps/api: domain, use cases, Prisma `app` schema, REST endpoints with
-      @nestjs/swagger decorators, regenerated packages/api-client.
+      @nestjs/swagger decorators, regenerated packages/api-client, and the
+      shared validation vectors of every rule a web form mirrors (ADR-004).
     web: >
       apps/web: pages, components, forms, hooks, BFF route handlers, `bff`
-      session schema, en/uk UI strings.
+      session schema, en/uk UI strings. Imports shared validation vectors,
+      never writes them.
   web_depends_on_api: >
     A web story that consumes an endpoint names its api story in `depends_on`
     and may start only when that story is DONE: OpenAPI is generated from code,
-    so the contract is the merged endpoint plus the regenerated client. A
+    so the contract is the merged endpoint, the regenerated client and the
+    shared validation vectors. A missing vector set is a contract gap. A
     contract gap found later makes the web story BLOCKED; a backlog amend
     (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web
     story that depends on it, and drops the blocked one.
@@ -162,7 +165,7 @@ story_stages:
   PLANNING:
     type: automated_skill
     skill: implementation-planner
-    inputs: [story, specification, epic_decisions]
+    inputs: [story, specification, epic_decisions, dependency_spec]
     outputs: [implementation_plan]
     next: HUMAN_PLAN_APPROVAL
     does: >
@@ -183,7 +186,7 @@ story_stages:
   TEST_FIRST:
     type: automated_skill
     skill: test-writer
-    inputs: [story, specification, implementation_plan]
+    inputs: [story, specification, implementation_plan, dependency_spec]
     outputs: [test_report]
     next: IMPLEMENTATION
     does: >
@@ -200,7 +203,8 @@ story_stages:
     skill_by_layer:
       api: nest-implementor
       web: next-implementor
-    inputs: [story, specification, implementation_plan, test_report, epic_decisions]
+    inputs:
+      [story, specification, implementation_plan, test_report, epic_decisions, dependency_spec]
     outputs: [implementation_report]
     next: REVIEW
     does: >
@@ -215,7 +219,15 @@ story_stages:
     type: automated_skill
     skill: story-reviewer
     fresh_context: true
-    inputs: [story, specification, implementation_plan, test_report, implementation_report]
+    inputs:
+      [
+        story,
+        specification,
+        implementation_plan,
+        test_report,
+        implementation_report,
+        dependency_spec,
+      ]
     outputs: [review]
     next: HUMAN_ACCEPTANCE
     checks: # run by script; results recorded verbatim in `review`
@@ -258,6 +270,8 @@ story_stages:
 # -----------------------------------------------------------------------------
 # Inputs: `dependency_spec` is the api dependency's `specification`; it is
 # absent (and skipped) for api stories and web stories without depends_on.
+# Every story stage from CLARIFICATION to REVIEW lists it: the web spec, plan,
+# tests, code and review are all checked against the same api contract.
 # Project documents (epic, brd, design_index, adr) are read-only inputs.
 #
 # Loop-backs: a Skill may name only a key under its stage's `loop_back`. A human

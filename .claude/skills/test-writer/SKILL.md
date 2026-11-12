@@ -17,7 +17,9 @@ planned signature that throws `not implemented`), each listed in `tests.md`.
 
 ## Inputs
 
-`story`, `specification`, `implementation_plan`. Read existing tests and test setup first
+`story`, `specification`, `implementation_plan`, `dependency_spec` (web with `depends_on`: the api
+errors to mock at the network boundary and the vector sets to import). Read existing tests and
+test setup first
 (`apps/api/vitest*.ts`, `apps/api/test/`, `apps/web/src/test/setup.ts`) and follow their style.
 Web: tests sit next to the file they test and import it at the path the plan gives it under
 `apps/web/docs/web-patterns.md` §8 "File roles"; utils and hooks are tested without rendering.
@@ -29,7 +31,9 @@ Web: tests sit next to the file they test and import it at the path the plan giv
 2. Assert observable behavior through public interfaces — use case results, HTTP responses,
    rendered text and roles — never private internals or implementation details.
 3. Cover the boundaries the spec states (lengths, Unicode, empty, limits) with table-driven cases
-   (`it.each`). A rule mirrored in Zod and `class-validator` uses one shared vector list.
+   (`it.each`). A rule mirrored in Zod and `class-validator` iterates the one shared vector set
+   at the location the plan names (ADR-004): the api story writes it (it is a test fixture, so
+   TEST_FIRST owns it and lists its hash), the web story imports it. Never copy cases.
 4. api: unit tests with in-memory fakes of ports; integration tests against the local database
    (`pnpm db:up`); e2e with the Nest testing module and supertest-style requests.
 5. web: Testing Library queries by role and label; user events, not `fireEvent`, where available;

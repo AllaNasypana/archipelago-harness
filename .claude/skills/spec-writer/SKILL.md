@@ -56,16 +56,17 @@ Non-blocking notes for planning. Anything blocking means BLOCKED, not a note.
 
 ### Design — api
 
-| Section       | Content                                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------------------- |
-| Endpoints     | method, path under `/api/v1`, auth requirement, success status                                            |
-| Request DTO   | fields, types, `class-validator` rules with explicit bounds and normalization (trim, case), Unicode notes |
-| Response DTO  | fields the caller needs, no more; no Prisma types                                                         |
-| Errors        | each failure the caller must tell apart: status, error code, when; in the ADR-defined error format        |
-| Authorization | who may call, ownership checks, what an outsider gets (403 vs 404)                                        |
-| Domain rules  | invariants and state transitions with rule IDs; which module owns them                                    |
-| Persistence   | Prisma model changes in the `app` schema, constraints/indexes enforcing invariants, migration notes       |
-| Side effects  | outbox events, emails — after commit (AGENTS.md §3.10)                                                    |
+| Section        | Content                                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Endpoints      | method, path under `/api/v1`, auth requirement, success status                                                            |
+| Request DTO    | fields, types, `class-validator` rules with explicit bounds and normalization (trim, case), Unicode notes                 |
+| Response DTO   | fields the caller needs, no more; no Prisma types                                                                         |
+| Errors         | each failure the caller must tell apart: status, error code, when; in the ADR-defined error format                        |
+| Authorization  | who may call, ownership checks, what an outsider gets (403 vs 404)                                                        |
+| Domain rules   | invariants and state transitions with rule IDs; which module owns them                                                    |
+| Persistence    | Prisma model changes in the `app` schema, constraints/indexes enforcing invariants, migration notes                       |
+| Side effects   | outbox events, emails — after commit (AGENTS.md §3.10)                                                                    |
+| Shared vectors | per rule a web form will mirror (rule ID): set name, accept and reject cases incl. bounds and Unicode; stored per ADR-004 |
 
 Contract first (AGENTS.md §3.11): DTOs and Swagger decorators are designed here; the OpenAPI
 document is generated from code. If the project has no OpenAPI generation or error format yet and
@@ -77,8 +78,8 @@ missing decision.
 | Section       | Content                                                                                                                                                               |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Route         | path, route group, Server vs Client parts, redirects                                                                                                                  |
-| Components    | tree of `features/<feature>/` by file role (web-patterns §8): components (UI only), hooks, utils, actions, `types.ts`; reused `components/ui` primitives          |
-| Form          | fields, Zod schema mirroring the api rules (cite the api spec), submit behavior                                                                                       |
+| Components    | tree of `features/<feature>/` by file role (web-patterns §8): components (UI only), hooks, utils, actions, `types.ts`; reused `components/ui` primitives              |
+| Form          | fields, Zod schema mirroring the api rules (cite the api spec and its **Shared vectors** set per field), submit behavior                                              |
 | UI states     | loading, empty, error, success, disabled — what each shows                                                                                                            |
 | Design        | mockup panels used, design README corrections applied, where epic text overrides; app shell only from `general/` (BRD D17); tokens/classes reused, any new one listed |
 | Strings       | every new key with `en` and `uk` text                                                                                                                                 |

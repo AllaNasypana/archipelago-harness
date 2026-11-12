@@ -16,8 +16,8 @@ security. Follow `docs/workflow/stage-contract.md`. You write only `review.md`; 
 
 ## Inputs
 
-`story`, `specification`, `implementation_plan`, `test_report`, `implementation_report`, and the
-diff of the story (`git diff <story.base_commit>` from `workflow-state.yaml`, plus untracked files).
+`story`, `specification`, `implementation_plan`, `test_report`, `implementation_report`,
+`dependency_spec` (web with `depends_on`), and the diff of the story (`git diff <story.base_commit>` from `workflow-state.yaml`, plus untracked files).
 Rules: `AGENTS.md`, the layer's `AGENTS.md`, `apps/web/docs/web-patterns.md` for web.
 
 ## 1. Run the checks
@@ -41,7 +41,7 @@ with the reason — never as passed.
 | Correctness | Each spec AC has a test that asserts it and passes; every test file's SHA-256 matches `tests.md` (a mismatch is blocking, `implementation_issues`); behavior matches the spec (endpoints, DTOs, errors, UI states, strings); the diff follows the plan or the deviation is justified; no stubs left |
 | Boundaries  | api: module layering, no cross-module repositories, no Prisma types in DTOs, `app` schema only, Unit of Work for atomic cases, outbox for side effects. web: business rules stay in NestJS, BFF-only data access, `server-only` modules, `bff` schema only                                          |
 | Security    | Authorization on every protected resource; tokens and session IDs never in client code, responses, storage or logs; cookie flags, CSRF, fixation, revocation (web); input validated at the server; no secrets committed; nothing in AGENTS.md §7's never-log list is logged                         |
-| Contract    | api: generated OpenAPI and client match the spec; web: calls match the dependency's spec                                                                                                                                                                                                            |
+| Contract    | api: generated OpenAPI and client match the spec; every **Shared vectors** set exists at the ADR-004 location and the DTO test iterates it. web: calls and error handling match `dependency_spec`; the Zod test imports its vector sets, no copied cases                                            |
 | Readability | AGENTS.md §5 code bar and the web code principles: concise, idiomatic, clear names, small units, no speculative abstraction, no duplication; `en` + `uk` for every string; tokens not raw colors                                                                                                    |
 | Scope       | Only files the story needs; nothing outside its layer                                                                                                                                                                                                                                               |
 

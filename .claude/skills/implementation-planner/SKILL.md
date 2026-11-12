@@ -16,8 +16,10 @@ You write only `plan.md`; no code.
 
 ## Inputs
 
-`story`, `specification` (must be `APPROVED`), the active epic's `decisions.md`. Read the code the
-story touches first: existing modules, components, helpers, tests, Prisma schema, package.json.
+`story`, `specification` (must be `APPROVED`), the active epic's `decisions.md`, and
+`dependency_spec` (web with `depends_on`: the api calls, errors and shared vector sets the plan
+builds on). Read the code the story touches first: existing modules, components, helpers, tests,
+Prisma schema, package.json, and for web the generated `packages/api-client` types it calls.
 Web: `apps/web/AGENTS.md` and `apps/web/docs/web-patterns.md` bind the plan; every file in
 Changes has one role from §8 "File roles"; a reused style gets its home from §9 "Styles" as a
 Changes row.
@@ -74,7 +76,13 @@ Commands REVIEW must run for this story beyond the baseline.
 | web   | route handler    | BFF handlers: session, cookies, error mapping                                               |
 
 Every AC gets at least one test. A rule implemented in Zod and `class-validator` gets the same
-vectors on both sides (AGENTS.md §6).
+vectors on both sides (AGENTS.md §6, ADR-001), from the one location ADR-004 names:
+
+- **api** story whose spec has **Shared vectors**: an AC → test matrix row names the vector-set
+  file at that location (TEST_FIRST writes it like any test file); the DTO test iterates it.
+- **web** story: the Zod schema test imports the set named in `dependency_spec`; never copies a
+  case. A set the web form needs but the api did not publish is an api contract gap → `BLOCKED`.
+- ADR-004 not `Accepted` while the story has a mirrored rule → `BLOCKED` naming ADR-004.
 
 ## Quality bar
 

@@ -99,7 +99,7 @@ Commands (repository root; Turborepo runs them per package, `--filter <package>`
 - Business-rule changes require unit tests; Prisma transactions, authorization, session lifecycle, and outbox behavior require integration tests.
 - `apps/web` uses Vitest + Testing Library (ADR-001): test pure functions, Zod schemas, custom hooks (`renderHook`), components with behavior, and BFF route handlers.
 - For REST contract changes, verify consistency between OpenAPI and the generated client.
-- A validation rule implemented in both Zod and `class-validator` is tested with the same accept/reject vectors on both sides, including boundaries and Unicode.
+- A validation rule implemented in both Zod and `class-validator` is tested with the same accept/reject vectors on both sides, including boundaries and Unicode. The vectors live in `@archipelago/shared/validation-vectors`; the api story writes them, the web story imports them ([ADR-004](docs/adr/ADR-004-shared-validation-vectors.md)).
 - For module-boundary changes, run architecture/dependency checks; circular dependencies are not permitted.
 - Never claim checks passed unless you ran them. Report the exact commands, results, and environment limitations.
 - Do not modify or delete tests merely to conceal a defect.
