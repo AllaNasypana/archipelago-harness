@@ -41,7 +41,10 @@ hard-code them.
 ## Output
 
 Write your artifact at its registry path with the front matter from `artifact-schema.md`
-(`inputs` = every workflow artifact read, with its version). Review Skills also write `verdict`.
+(`inputs` = every document passed to you, each with its `version` or `commit`). Read no other
+workflow artifact or project document (the mockups `design_index` lists count as part of it): if
+you need one, it is missing from the stage's `inputs`
+in `stage-map.yaml` — return `BLOCKED` naming it rather than reading it silently. Review Skills also write `verdict`.
 
 ## Result envelope
 

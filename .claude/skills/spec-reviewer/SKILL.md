@@ -15,8 +15,8 @@ You did not write this spec; read it as the person who must build and test it. F
 ## Inputs
 
 `story`, `clarification`, `specification`, the active epic's `decisions.md`, `dependency_spec`
-(web with `depends_on`). Also the epic and BRD rules cited, Accepted ADRs, `AGENTS.md` and the
-layer's `AGENTS.md`, and for web `docs/design/README.md`.
+(web with `depends_on`). Also the epic and BRD rules cited, the PRD (Faithfulness only),
+Accepted ADRs, `agents_rules` and the layer's `layer_rules`, and for web `docs/design/README.md`.
 
 ## Checklist
 

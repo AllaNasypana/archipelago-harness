@@ -18,7 +18,8 @@ security. Follow `docs/workflow/stage-contract.md`. You write only `review.md`; 
 
 `story`, `specification`, `implementation_plan`, `test_report`, `implementation_report`,
 `dependency_spec` (web with `depends_on`), and the diff of the story (`git diff <story.base_commit>` from `workflow-state.yaml`, plus untracked files).
-Rules: `AGENTS.md`, the layer's `AGENTS.md`, `apps/web/docs/web-patterns.md` for web.
+Rules: `agents_rules` and the layer's `layer_rules`. The spec is the contract: the clarification,
+spec review and epic decisions are already folded into it and are not inputs here.
 
 ## 1. Run the checks
 

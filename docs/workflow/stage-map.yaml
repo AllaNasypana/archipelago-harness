@@ -151,6 +151,10 @@ story_stages:
         clarification,
         epic_decisions,
         dependency_spec,
+        epic,
+        brd,
+        prd,
+        adr,
         design_index,
         agents_rules,
         layer_rules,
@@ -175,6 +179,11 @@ story_stages:
         specification,
         epic_decisions,
         dependency_spec,
+        epic,
+        brd,
+        prd,
+        adr,
+        design_index,
         agents_rules,
         layer_rules,
       ]
@@ -194,7 +203,17 @@ story_stages:
   PLANNING:
     type: automated_skill
     skill: implementation-planner
-    inputs: [story, specification, epic_decisions, dependency_spec, agents_rules, layer_rules]
+    inputs:
+      [
+        story,
+        specification,
+        specification_review,
+        epic_decisions,
+        dependency_spec,
+        adr,
+        agents_rules,
+        layer_rules,
+      ]
     outputs: [implementation_plan]
     next: HUMAN_PLAN_APPROVAL
     does: >
@@ -215,7 +234,8 @@ story_stages:
   TEST_FIRST:
     type: automated_skill
     skill: test-writer
-    inputs: [story, specification, implementation_plan, dependency_spec, agents_rules, layer_rules]
+    inputs:
+      [story, specification, implementation_plan, dependency_spec, adr, agents_rules, layer_rules]
     outputs: [test_report]
     next: IMPLEMENTATION
     does: >
@@ -240,6 +260,7 @@ story_stages:
         test_report,
         epic_decisions,
         dependency_spec,
+        design_index,
         agents_rules,
         layer_rules,
       ]
@@ -312,6 +333,15 @@ story_stages:
 # absent (and skipped) for api stories and web stories without depends_on.
 # Every story stage from CLARIFICATION to REVIEW lists it: the web spec, plan,
 # tests, code and review are all checked against the same api contract.
+#
+# `inputs` is exactly what the stage's Skill reads, no more and no less: the
+# orchestrator passes these paths, the artifact lists them in front matter and
+# staleness checks them. A Skill that needs another document gets it added
+# here first. Code, tests and generated clients are read freely and not listed.
+# `design_index` is passed to web stories only; it covers the mockup images it
+# lists (docs/design/mockups/), which are read with it and not listed apart.
+# BACKLOG_SYNC also scans every docs/stories/epic-*/backlog.md (IDs) and
+# decisions.md (Hands off to); they belong to other epics and are not pinned.
 # Project documents (epic, brd, design_index, adr, agents_rules, layer_rules)
 # are read-only inputs. `layer_rules` resolves to the list for story.layer
 # (both lists at BACKLOG_SYNC); every file in it is passed and read.

@@ -17,8 +17,9 @@ planned signature that throws `not implemented`), each listed in `tests.md`.
 
 ## Inputs
 
-`story`, `specification`, `implementation_plan`, `dependency_spec` (web with `depends_on`: the api
-errors to mock at the network boundary and the vector sets to import). Read existing tests and
+`story`, `specification`, `implementation_plan`, Accepted ADRs (ADR-001 test tooling, ADR-004
+vector sets), `dependency_spec` (web with `depends_on`: the api errors to mock at the network
+boundary and the vector sets to import). Read existing tests and
 test setup first
 (`apps/api/vitest*.ts`, `apps/api/test/`, `apps/web/src/test/setup.ts`) and follow their style.
 Api: `apps/api/AGENTS.md` (ESM `.js` imports, Vitest `vi.fn()`); tests import a module through

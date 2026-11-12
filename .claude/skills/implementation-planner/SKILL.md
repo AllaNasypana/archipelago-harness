@@ -16,9 +16,10 @@ You write only `plan.md`; no code.
 
 ## Inputs
 
-`story`, `specification` (must be `APPROVED`), the active epic's `decisions.md`, and
-`dependency_spec` (web with `depends_on`: the api calls, errors and shared vector sets the plan
-builds on). Read the code the story touches first: existing modules, components, helpers, tests,
+`story`, `specification` (must be `APPROVED`), `specification_review` (its non-blocking findings
+are notes the plan answers or carries to Impact), the active epic's `decisions.md`, Accepted ADRs
+(the Decisions section builds on them), and `dependency_spec` (web with `depends_on`: the api
+calls, errors and shared vector sets the plan builds on). Read the code the story touches first: existing modules, components, helpers, tests,
 Prisma schema, package.json, and for web the generated `packages/api-client` types it calls.
 The layer's `layer_rules` bind the plan. Api: every file in Changes sits in the module layer
 `apps/api/AGENTS.md` "Structure" gives it (`domain/`, `application/`, `infrastructure/`,
