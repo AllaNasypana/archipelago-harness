@@ -1,8 +1,8 @@
 ---
 artifact_type: epic_decisions
 epic: EPIC-01
-version: 2
-updated_at: 2026-11-11T15:09:15Z
+version: 3
+updated_at: 2026-11-12T09:43:14Z
 produced_by: backlog-sync
 ---
 
@@ -74,3 +74,10 @@ Migrated from the slice's Q1–Q8, accepted by the human on 2026-11-09 (Q8: 2026
 - **Source:** human, 2026-11-11
 - **Affects:** EPIC-02/03/06 backlogs (their create-form web stories)
 - **Hands off to:** EPIC-02, EPIC-03, EPIC-06
+
+### D-01-10 — Locale in the URL
+
+- **Status:** DECIDED
+- **Decision:** The UI locale is a URL path segment (`/en/...`, `/uk/...`) on every UI route. Links, redirects and `returnTo` keep the current locale; the EN / УКР toggle switches the segment. Details (unprefixed URLs, remembering the choice) are settled in US-00-01-web.
+- **Source:** human, 2026-11-12, US-00-01-web clarification Q2
+- **Affects:** US-00-01-web and every EPIC-01 web story (routes, redirects, returnTo); BFF route handlers under `app/api` are not localized

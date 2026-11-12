@@ -1,0 +1,20 @@
+{
+  "common": {
+    "appName": "Archipelago",
+    "appDescription": "Align invested time with your chosen priorities."
+  },
+  "home": {
+    "tagline": "Choose Focus → Invest Time → Reflect → Adjust",
+    "workspaceSetup": "Workspace setup",
+    "inProgress": "In progress"
+  },
+  "localeToggle": {
+    "label": "Language",
+    "en": "EN",
+    "uk": "УКР"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "backHome": "Go to home page"
+  }
+}
