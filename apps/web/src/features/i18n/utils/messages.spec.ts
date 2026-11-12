@@ -1,6 +1,7 @@
-import en from './messages/en.json';
-import uk from './messages/uk.json';
-import { type DeepPartial, getMessages, type Messages, messageKeys, resolveMessages } from './messages';
+import en from '../messages/en.json';
+import uk from '../messages/uk.json';
+import type { DeepPartial, Messages } from '../types';
+import { getMessages, messageKeys, resolveMessages } from './messages';
 
 const base = {
   common: { appName: 'Archipelago', appDescription: 'Describe' },

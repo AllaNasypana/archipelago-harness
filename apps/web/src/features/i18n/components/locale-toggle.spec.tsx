@@ -2,8 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from './i18n-provider';
 import { LocaleToggle } from './locale-toggle';
-import en from './messages/en.json';
-import { setLocaleCookie } from './set-locale-cookie';
+import en from '../messages/en.json';
+import { setLocaleCookie } from '../actions/set-locale-cookie';
 
 const push = vi.fn();
 
@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push }),
 }));
 
-vi.mock('./set-locale-cookie', () => ({ setLocaleCookie: vi.fn() }));
+vi.mock('../actions/set-locale-cookie', () => ({ setLocaleCookie: vi.fn() }));
 
 const setCookie = vi.mocked(setLocaleCookie);
 

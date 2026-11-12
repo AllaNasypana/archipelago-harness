@@ -1,5 +1,5 @@
 import { isValidElement, type ReactElement, type ReactNode } from 'react';
-import { I18nProvider } from '@/features/i18n/i18n-provider';
+import { I18nProvider } from '@/features/i18n';
 import RootLayout from './layout';
 
 vi.mock('next/font/google', () => ({

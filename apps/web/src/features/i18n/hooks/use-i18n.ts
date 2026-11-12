@@ -1,7 +1,8 @@
 'use client';
 
 import { use } from 'react';
-import { I18nContext, type I18nValue } from './i18n-provider';
+import { I18nContext } from '../components/i18n-provider';
+import type { I18nValue } from '../types';
 
 export function useI18n(): I18nValue {
   const value = use(I18nContext);

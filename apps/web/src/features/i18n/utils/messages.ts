@@ -1,9 +1,6 @@
-import type { Locale } from './locale';
-import en from './messages/en.json';
-import uk from './messages/uk.json';
-
-export type Messages = typeof en;
-export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
+import en from '../messages/en.json';
+import uk from '../messages/uk.json';
+import type { DeepPartial, Locale, Messages } from '../types';
 
 type Tree = { [key: string]: unknown };
 

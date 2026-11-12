@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { isLocale, LOCALE_COOKIE, localeFromCookie } from '@/features/i18n/locale';
+import { isLocale, LOCALE_COOKIE, localeFromCookie } from '@/features/i18n';
 
 // Order for US-00-02-web: the locale redirect runs first; session redirects then work on the
 // locale-stripped path and keep the prefix (D-01-10).
