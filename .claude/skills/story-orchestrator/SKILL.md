@@ -58,7 +58,8 @@ story.
 1. `stage := epic_stages[current_stage]` or `story_stages[current_stage]` (`stage-map.yaml`).
 2. Skill: `stage.skill`, or `stage.skill_by_layer[story.layer]`.
 3. Resolve every key in `stage.inputs` through `artifact-paths.yaml`. `dependency_spec` is the
-   `specification` of the story in `depends_on`; skip it when there is none.
+   `specification` of the story in `depends_on`; skip it when there is none. `layer_rules` is the
+   list for `story.layer` (both lists at `BACKLOG_SYNC`).
 4. Invoke by stage type:
    - `automated_skill` — run the Skill with: epic, story ID, layer, risk, stage, resolved input
      paths, and the instruction to stay in its responsibility and return the result envelope.

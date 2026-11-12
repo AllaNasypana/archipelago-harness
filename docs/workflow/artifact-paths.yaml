@@ -27,6 +27,9 @@ version: 2
 # --- Project documents: read-only inputs, no workflow owner -----------------
 project_documents:
   agents_rules: AGENTS.md
+  layer_rules: # resolved by story.layer; an epic stage gets both lists
+    api: [apps/api/AGENTS.md]
+    web: [apps/web/AGENTS.md, apps/web/docs/web-patterns.md]
   brd: docs/product/archipelago-business-requirements.md
   prd: docs/product/Archipelago_PRD_v1.2.md
   epic: docs/epics/EPIC-{epic}_*.md

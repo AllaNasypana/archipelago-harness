@@ -20,9 +20,11 @@ You write only `plan.md`; no code.
 `dependency_spec` (web with `depends_on`: the api calls, errors and shared vector sets the plan
 builds on). Read the code the story touches first: existing modules, components, helpers, tests,
 Prisma schema, package.json, and for web the generated `packages/api-client` types it calls.
-Web: `apps/web/AGENTS.md` and `apps/web/docs/web-patterns.md` bind the plan; every file in
-Changes has one role from §8 "File roles"; a reused style gets its home from §9 "Styles" as a
-Changes row.
+The layer's `layer_rules` bind the plan. Api: every file in Changes sits in the module layer
+`apps/api/AGENTS.md` "Structure" gives it (`domain/`, `application/`, `infrastructure/`,
+`presentation/`, `contracts/`; cross-module in `workflows/`), with no import that "Backend rules"
+forbid. Web: `apps/web/AGENTS.md` and `apps/web/docs/web-patterns.md`; every file in Changes has
+one role from §8 "File roles"; a reused style gets its home from §9 "Styles" as a Changes row.
 
 ## `plan.md`
 

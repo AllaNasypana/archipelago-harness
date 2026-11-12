@@ -24,16 +24,16 @@ workflow state.
 
 Resolve paths from `docs/workflow/artifact-paths.yaml`; the orchestrator passes them.
 
-| Input                                                               | Why                                                      |
-| ------------------------------------------------------------------- | -------------------------------------------------------- |
-| `story.md`                                                          | The story, its layer, risk, refs, `depends_on`           |
-| `decisions.md` of the active epic                                   | Settled and `OPEN` epic decisions — never re-ask settled |
-| The epic, the BRD rules it cites                                    | Flows, rules, AC wording; BRD wins on conflict           |
-| `docs/design/README.md` (web)                                       | Mockup panels and the corrections that override them     |
-| `docs/adr/`                                                         | Accepted decisions bind; proposed ones are not answers   |
-| `AGENTS.md`, `apps/<layer>/AGENTS.md`                               | Boundaries and conventions                               |
-| Dependency `spec.md` and `clarification.md` (web with `depends_on`) | The api story's settled contract and decisions           |
-| Existing code the story touches                                     | Current behavior, existing modules, components, tokens   |
+| Input                                                               | Why                                                                                                  |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `story.md`                                                          | The story, its layer, risk, refs, `depends_on`                                                       |
+| `decisions.md` of the active epic                                   | Settled and `OPEN` epic decisions — never re-ask settled                                             |
+| The epic, the BRD rules it cites                                    | Flows, rules, AC wording; BRD wins on conflict                                                       |
+| `docs/design/README.md` (web)                                       | Mockup panels and the corrections that override them                                                 |
+| `docs/adr/`                                                         | Accepted decisions bind; proposed ones are not answers                                               |
+| `AGENTS.md` and the layer's `layer_rules` (`artifact-paths.yaml`)   | Boundaries and conventions; web patterns answer UI questions (URL dialogs and filters, error format) |
+| Dependency `spec.md` and `clarification.md` (web with `depends_on`) | The api story's settled contract and decisions                                                       |
+| Existing code the story touches                                     | Current behavior, existing modules, components, tokens                                               |
 
 ## Workflow
 

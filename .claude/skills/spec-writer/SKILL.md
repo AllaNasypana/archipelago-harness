@@ -19,8 +19,10 @@ are checked against. Follow `docs/workflow/stage-contract.md`.
 `story`, `clarification` (must be `APPROVED`), the active epic's `decisions.md`,
 `dependency_spec` (web with `depends_on`), `docs/design/README.md` (web). Read the epic and BRD
 rules the story cites (the PRD only for context; precedence BRD → epic → PRD, AGENTS.md §5.1),
-Accepted ADRs, and the code the story touches. Web: `apps/web/AGENTS.md` and
-`apps/web/docs/web-patterns.md` bind the design section; its Components row follows §8 "File
+Accepted ADRs, and the code the story touches. The layer's `layer_rules` bind the design section:
+api — `apps/api/AGENTS.md` "Structure" and "Backend rules" (which module owns each rule, what goes
+to `contracts/`, cross-module work in `workflows/`, nothing shared in `common/`); web —
+`apps/web/AGENTS.md` and `apps/web/docs/web-patterns.md`, its Components row follows §8 "File
 roles".
 
 The clarification's **Spec checklist** is a to-do list: every item ends up in the spec, or the

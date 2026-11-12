@@ -81,7 +81,7 @@ epic_stages:
   BACKLOG_SYNC:
     type: automated_skill
     skill: backlog-sync
-    inputs: [epic, brd, design_index, adr]
+    inputs: [epic, brd, design_index, adr, agents_rules, layer_rules]
     outputs: [backlog, story, epic_decisions]
     next: HUMAN_BACKLOG_APPROVAL
     does: >
@@ -120,7 +120,18 @@ story_stages:
   CLARIFICATION:
     type: interactive_skill # needs a live human; Auto mode stops here
     skill: story-clarifier
-    inputs: [story, epic, brd, design_index, adr, epic_decisions, dependency_spec]
+    inputs:
+      [
+        story,
+        epic,
+        brd,
+        design_index,
+        adr,
+        epic_decisions,
+        dependency_spec,
+        agents_rules,
+        layer_rules,
+      ]
     outputs: [clarification, story, epic_decisions]
     next: SPECIFICATION
     does: >
@@ -134,7 +145,16 @@ story_stages:
   SPECIFICATION:
     type: automated_skill
     skill: spec-writer
-    inputs: [story, clarification, epic_decisions, dependency_spec, design_index]
+    inputs:
+      [
+        story,
+        clarification,
+        epic_decisions,
+        dependency_spec,
+        design_index,
+        agents_rules,
+        layer_rules,
+      ]
     outputs: [specification]
     next: SPEC_REVIEW
     does: >
@@ -148,7 +168,16 @@ story_stages:
     type: automated_skill
     skill: spec-reviewer
     fresh_context: true # runs in a subagent that did not write the spec
-    inputs: [story, clarification, specification, epic_decisions, dependency_spec]
+    inputs:
+      [
+        story,
+        clarification,
+        specification,
+        epic_decisions,
+        dependency_spec,
+        agents_rules,
+        layer_rules,
+      ]
     outputs: [specification_review]
     next: HUMAN_SPEC_APPROVAL
     loop_back:
@@ -165,7 +194,7 @@ story_stages:
   PLANNING:
     type: automated_skill
     skill: implementation-planner
-    inputs: [story, specification, epic_decisions, dependency_spec]
+    inputs: [story, specification, epic_decisions, dependency_spec, agents_rules, layer_rules]
     outputs: [implementation_plan]
     next: HUMAN_PLAN_APPROVAL
     does: >
@@ -186,7 +215,7 @@ story_stages:
   TEST_FIRST:
     type: automated_skill
     skill: test-writer
-    inputs: [story, specification, implementation_plan, dependency_spec]
+    inputs: [story, specification, implementation_plan, dependency_spec, agents_rules, layer_rules]
     outputs: [test_report]
     next: IMPLEMENTATION
     does: >
@@ -204,7 +233,16 @@ story_stages:
       api: nest-implementor
       web: next-implementor
     inputs:
-      [story, specification, implementation_plan, test_report, epic_decisions, dependency_spec]
+      [
+        story,
+        specification,
+        implementation_plan,
+        test_report,
+        epic_decisions,
+        dependency_spec,
+        agents_rules,
+        layer_rules,
+      ]
     outputs: [implementation_report]
     next: REVIEW
     does: >
@@ -227,6 +265,8 @@ story_stages:
         test_report,
         implementation_report,
         dependency_spec,
+        agents_rules,
+        layer_rules,
       ]
     outputs: [review]
     next: HUMAN_ACCEPTANCE
@@ -272,7 +312,9 @@ story_stages:
 # absent (and skipped) for api stories and web stories without depends_on.
 # Every story stage from CLARIFICATION to REVIEW lists it: the web spec, plan,
 # tests, code and review are all checked against the same api contract.
-# Project documents (epic, brd, design_index, adr) are read-only inputs.
+# Project documents (epic, brd, design_index, adr, agents_rules, layer_rules)
+# are read-only inputs. `layer_rules` resolves to the list for story.layer
+# (both lists at BACKLOG_SYNC); every file in it is passed and read.
 #
 # Loop-backs: a Skill may name only a key under its stage's `loop_back`. A human
 # rejection goes to `on_reject`, or to a stage named in `reject_targets`. An

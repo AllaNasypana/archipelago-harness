@@ -17,8 +17,10 @@ hard-code them.
    naming it if an input is missing, or an **input** is itself stale (it lists an input now at a
    higher version, `artifact-lifecycle.md` §1). Your **own** artifact being stale is not a block:
    it is the reason you run — revise it and record the current input versions.
-2. Read the rules for the layer: `AGENTS.md`, `apps/api/AGENTS.md` or `apps/web/AGENTS.md`, and
-   for web `apps/web/docs/web-patterns.md`. Only `Accepted` ADRs bind.
+2. Read the rules: `agents_rules` (`AGENTS.md`) and every file of `layer_rules` for the story's
+   layer (`artifact-paths.yaml`: api → `apps/api/AGENTS.md`; web → `apps/web/AGENTS.md`,
+   `apps/web/docs/web-patterns.md`). They bind your artifact; list each in `inputs`. Only
+   `Accepted` ADRs bind.
 3. Re-entered? Read the sending artifact and fix exactly what its blocking findings (or the
    comment) name; keep the rest unchanged. Revise in place (`version + 1`, `status: DRAFT`),
    append the re-entry to `feedback` (never to `inputs`), and add a **Feedback addressed**
