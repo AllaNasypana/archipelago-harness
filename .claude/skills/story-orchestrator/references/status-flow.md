@@ -8,7 +8,9 @@
 - Epic: ID, status, story counts by status from `backlog.md`.
 - Story: ID, layer, risk, `depends_on` and its status.
 - `current_stage`, `previous_stage`, `attempt`, `last_result`.
-- Current stage inputs and outputs: path, exists?, version, status; stale inputs.
+- Current stage inputs and outputs: path, exists?, version, status; stale inputs, including
+  project documents whose `commit` changed (name the path and both commits) or have uncommitted
+  changes.
 - `OPEN` epic decisions affecting the story; `TODO`/`TBD` in `APPROVED` inputs.
 - Pending gate: artifacts to read and the exact commands.
 - Blocking issues; non-blocking findings count.

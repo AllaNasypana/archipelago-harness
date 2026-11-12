@@ -29,11 +29,21 @@ Rules:
   `APPROVED` itself, because the human confirms inside the stage.
 - A Skill never changes the status of an artifact it does not own (except the orchestrator as
   above).
-- **Staleness:** each artifact lists the versions it read (`artifact-schema.md`). If an input is
-  now at a higher version, the artifact is stale. Its owner re-runs and revises it; any other
-  stage that consumes it returns `BLOCKED` and names the owner's stage to re-run. A loop-back
-  that revises an approved artifact therefore sends the story through that artifact's gate
-  again — routing in `stage-map.yaml` already does this.
+- **Staleness:** each artifact lists what it read (`artifact-schema.md`). It is stale when a
+  workflow input is now at a higher `version`, or a project document's
+  `git log -1 --format=%h --abbrev=12 -- <path>` no longer equals the recorded `commit` (a rule,
+  BRD or epic changed after the artifact was written). An entry without `commit` (written before
+  2026-11-12) is not checked. Its owner re-runs and revises it; any other stage that consumes it
+  returns `BLOCKED` and names the owner's stage to re-run. A loop-back that revises an approved
+  artifact therefore sends the story through that artifact's gate again — routing in
+  `stage-map.yaml` already does this.
+- **Stale routing:** on every `/so:next` (also at a gate) the orchestrator checks the active
+  story's artifacts. If one is stale, it moves the story back to the earliest stage whose own
+  output is stale (history verdict `STALE_INPUT`, note: the changed path); later stages re-run
+  in order and every gate on the way is passed again.
+- **Refresh without revision:** a re-run for a changed project document that does not affect the
+  artifact updates only `inputs` and `updated_at`; `version` and `status` stay, so consumers do not
+  go stale. Any content change is a normal revision (`version + 1`, `DRAFT`).
 - **Feedback is not an input.** What sent the work back (a review, a later stage's artifact, a
   gate comment) is recorded under `feedback`, never `inputs`, and is not checked for staleness.
   The sender re-runs after the revision, so as an input each would make the other stale forever.

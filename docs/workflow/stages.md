@@ -200,6 +200,11 @@ each blocking finding in a **Feedback addressed** section; the reviewer re-check
 first. A web story that finds a
 gap in its api contract does not loop into the api story: it goes `BLOCKED`, and a backlog amend (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web story that depends on it; the blocked story is parked, then dropped.
 
+A change to a project document (a rule in `AGENTS.md` / `web-patterns.md`, the BRD, the epic, an
+ADR) makes every active-story artifact that read it stale: each input records the file's last
+commit. The next `/so:next` moves the story back to the earliest stale stage (`STALE_INPUT`);
+artifacts the change does not affect are only refreshed, not revised.
+
 A stage that runs more than `max_attempts` (3) times in a row is `BLOCKED` until you run
 `/so:next continue`.
 

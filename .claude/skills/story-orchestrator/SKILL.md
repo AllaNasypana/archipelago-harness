@@ -97,8 +97,11 @@ story.
 
 - `workflow-state.yaml` is internally consistent: a story implies an epic `IN_DELIVERY`; a gate
   stage implies `pending_human_gate`; `current_stage` exists in `stage-map.yaml`.
-- Inputs exist and none is stale (`artifact-lifecycle.md` §1); a `DONE` dependency's artifacts
-  are frozen and only need to exist `APPROVED`.
+- Inputs exist and none is stale (`artifact-lifecycle.md` §1: `version` and project-document
+  `commit`); a `DONE` dependency's artifacts are frozen and only need to exist `APPROVED`. A stale
+  artifact of the active story is not a block: apply **Stale routing** below.
+- Every project document the current stage reads is committed
+  (`git status --porcelain -- <path>` empty); otherwise `BLOCKED`, "commit <path> first".
 - Story stages: no `OPEN` entry in `decisions.md` lists this story under **Affects**, except at
   `CLARIFICATION`, which resolves them.
 - No `TODO`/`TBD`/`FIXME`/`???` in an `APPROVED` input.
@@ -107,10 +110,17 @@ story.
 On failure: invoke nothing, set `BLOCKED`, name the invariant and the stage or human action that
 fixes it.
 
+**Stale routing.** Check every existing artifact of the active story whose stage is at or before
+`current_stage` in `story_stage_order`, also when `current_stage` is a gate. If any is stale, set
+`current_stage` to the earliest stage whose own output is stale, clear `pending_human_gate`,
+`attempt: 1`, `status: IN_PROGRESS`, and append `{"verdict":"STALE_INPUT","note":"<artifact>:
+<changed path>",...}`. Then stop and report; the next `/so:next` runs that stage. Never route
+forward.
+
 ## Idempotency
 
 Before invoking, check whether the stage already has a current output for this story (its
-`inputs` versions match the files now). If yes, reuse it instead of regenerating: its `verdict`
+`inputs` versions and project-document commits match the files now). If yes, reuse it instead of regenerating: its `verdict`
 for a review, `PASS` for any other output. Revisions are in place: the owner bumps `version` and
 resets `status: DRAFT`.
 
@@ -132,7 +142,7 @@ never copied findings. Never claim a transition you did not write.
 
 Only on an explicit human instruction naming the story and a reason: set it `DROPPED` in
 `backlog.md` with the reason in a note under the table, append an event, and, if it was active,
-reset the story as `DONE` does (`state-schema.md` rule 7) without marking it `DONE`.
+reset the story as `DONE` does (`state-schema.md` rule 8) without marking it `DONE`.
 
 ## Boundaries
 

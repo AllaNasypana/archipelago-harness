@@ -87,8 +87,10 @@ pending_human_gate:
    `SKIPPED`, then the gate's `on_approve`.
 5. Entering a human gate sets `WAITING_FOR_HUMAN` and fills `pending_human_gate`. `/so:approve`
    → `on_approve`; `/so:reject` → `on_reject` or a listed `reject_targets` stage.
-6. A review `PASS` is never human approval. Auto Mode never passes a gate or runs `CLARIFICATION`.
-7. Reaching `DONE` sets the story `DONE` in `backlog.md` and resets `story`, `current_stage`,
+6. A stale artifact of the active story (`artifact-lifecycle.md` §1) moves `current_stage` back
+   to the earliest stage whose output is stale: one `STALE_INPUT` event, never forward.
+7. A review `PASS` is never human approval. Auto Mode never passes a gate or runs `CLARIFICATION`.
+8. Reaching `DONE` sets the story `DONE` in `backlog.md` and resets `story`, `current_stage`,
    `previous_stage`, `last_result`, `blocking_issues` and `non_blocking_findings`; `status: IDLE`.
 
 ---
@@ -114,5 +116,5 @@ One JSON object per line, append-only, never rewritten.
 
 `verdict` is a stage verdict or a lifecycle marker: `EPIC_ACTIVATED`, `BACKLOG_APPROVED`,
 `ACTIVATED`, `HUMAN_APPROVED`, `HUMAN_REJECTED`, `SKIPPED`, `DONE`, `EPIC_DONE`, `BACKLOG_AMEND`,
-`PARKED`, `CONTINUED`. Epic-stage
+`PARKED`, `CONTINUED`, `STALE_INPUT`. Epic-stage
 events have `story: null`. For human decisions `skill` is `null` and `note` holds the comment.

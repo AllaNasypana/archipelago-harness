@@ -14,9 +14,10 @@ hard-code them.
 ## Before working
 
 1. Read every input. Check the front matter of each workflow artifact you read. Return `BLOCKED`
-   naming it if an input is missing, or an **input** is itself stale (it lists an input now at a
-   higher version, `artifact-lifecycle.md` §1). Your **own** artifact being stale is not a block:
-   it is the reason you run — revise it and record the current input versions.
+   naming it if an input is missing, or an **input** is itself stale (a higher `version` or a
+   changed `commit`, `artifact-lifecycle.md` §1). Your **own** artifact being stale is not a
+   block: it is the reason you run — revise it, or only refresh `inputs` if the change does not
+   affect it, and record the current versions and commits.
 2. Read the rules: `agents_rules` (`AGENTS.md`) and every file of `layer_rules` for the story's
    layer (`artifact-paths.yaml`: api → `apps/api/AGENTS.md`; web → `apps/web/AGENTS.md`,
    `apps/web/docs/web-patterns.md`). They bind your artifact; list each in `inputs`. Only

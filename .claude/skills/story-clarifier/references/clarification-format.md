@@ -16,7 +16,7 @@ produced_by: story-clarifier
 inputs:
   - { path: docs/stories/epic-03/US-03-02-api/story.md, version: 1 }
   - { path: docs/stories/epic-03/decisions.md, version: 2 }
-  - { path: docs/epics/EPIC-03_Goals_Management.md }
+  - { path: docs/epics/EPIC-03_Goals_Management.md, commit: <git log -1 --format=%h --abbrev=12> }
 ---
 
 # US-03-02-api — Clarification

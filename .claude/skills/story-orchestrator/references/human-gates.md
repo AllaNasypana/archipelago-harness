@@ -17,7 +17,9 @@ human command moves it.
 
 ## `/so:approve [comment]`
 
-Refuse unless `current_stage` is a human gate and every required artifact exists and is current.
+Refuse unless `current_stage` is a human gate and every required artifact exists and is current
+(no higher input `version`, no changed project-document `commit`); a stale one → run `/so:next`,
+which routes back.
 For `HUMAN_BACKLOG_APPROVAL` also check that every story `backlog.md` lists has its `story.md`.
 At `HUMAN_SPEC_APPROVAL` and `HUMAN_ACCEPTANCE` also refuse unless the feeding review's verdict
 was `PASS`.
@@ -31,7 +33,7 @@ was `PASS`.
 4. Clear `pending_human_gate` and move to `on_approve`:
    - `HUMAN_BACKLOG_APPROVAL` → effects in `epic-flow.md`.
    - `HUMAN_ACCEPTANCE` → `DONE`: set every story artifact `APPROVED`, the story `DONE` in
-     `backlog.md`, append `DONE`, reset the story (`state-schema.md` rule 7), check epic done
+     `backlog.md`, append `DONE`, reset the story (`state-schema.md` rule 8), check epic done
      (`epic-flow.md`), and list the next `READY` stories — especially a web story this api story
      unblocked.
    - otherwise `status: IN_PROGRESS`.
