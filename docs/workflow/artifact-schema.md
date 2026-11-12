@@ -81,8 +81,9 @@ status: DRAFT # APPROVED at HUMAN_BACKLOG_APPROVAL
 updated_at: 2026-11-11T09:00:00Z
 produced_by: backlog-sync
 inputs:
-  - { path: docs/epics/EPIC-03_Goals_Management.md }
-  - { path: docs/product/archipelago-business-requirements.md }
+  - { path: docs/epics/EPIC-03_Goals_Management.md, commit: <12-char sha> }
+  - { path: docs/product/archipelago-business-requirements.md, commit: <12-char sha> }
+  - { path: docs/product/Archipelago_PRD_v1.2.md, commit: <12-char sha> }
 ---
 ```
 
@@ -94,7 +95,8 @@ Body, in this order:
 2. **Coverage** — every epic AC mapped to stories, or marked `deferred` / `out of scope` with
    the reason; then **Carried over**: every decision from another epic that hands off to this
    one, with its ACs mapped to stories (or the constraint applied).
-3. **Open questions** — what blocks slicing; resolved ones move to `decisions.md`.
+3. **Open questions** — what blocks slicing (resolved ones move to `decisions.md`), "needs an
+   ADR" items, and non-blocking "PRD drift" notes for the owner.
 
 Only the orchestrator edits the Status column after approval, and raises Risk when
 `SPECIFICATION` does (`story.md` keeps the risk proposed at slicing).

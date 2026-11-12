@@ -26,6 +26,7 @@ an ADR.
 | Front matter and body formats        | `docs/workflow/artifact-schema.md`; templates in `references/templates.md`     |
 | The epic                             | its ACs, flows, screen inventory, open items, revision log                     |
 | Requirement IDs                      | BRD FR/BR/NFR with `Phase: EPIC-<nn>`                                          |
+| Product scope (lowest precedence)    | PRD §4 MVP scope and Excluded / Later, §14 journeys, §17 release sequence      |
 | UI references and corrections        | `docs/design/README.md`                                                        |
 | Boundaries                           | `AGENTS.md` §3–5, `apps/api/AGENTS.md`, `apps/web/AGENTS.md`                   |
 | Accepted / proposed decisions        | `docs/adr/`                                                                    |
@@ -87,6 +88,10 @@ an ADR.
     naming the stories it affects; answers the human already gave are `DECIDED` with the date.
     Project-wide conventions (error format, pagination, IDs, dates, logging) are not product
     decisions: list them under "Open questions" in `backlog.md` as "needs an ADR".
+11. **PRD drift.** Never slice a capability the PRD lists as Excluded / Later unless the BRD or
+    the epic requires it. Where the PRD contradicts the BRD or the epic, the higher source wins
+    (AGENTS.md §5.1); list each case under "Open questions" as "PRD drift: <PRD §> vs <rule ID>"
+    for the owner to fix the PRD. It does not block slicing.
 
 ## Quality checks before returning
 

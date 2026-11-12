@@ -13,14 +13,14 @@ does the same way (inputs, re-entry, output, result) is in [`stage-contract.md`]
 
 ## Sources every stage reads
 
-| Source                                                                                                              | Role                                                                                                     |
-| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` + `layer_rules` (api: `apps/api/AGENTS.md`; web: `apps/web/AGENTS.md`, `apps/web/docs/web-patterns.md`) | Architecture boundaries, coding, testing, security; registry keys, so every stage lists them in `inputs` |
-| `docs/product/archipelago-business-requirements.md` (BRD)                                                           | Wins on conflict; FR/BR/NFR IDs for traceability                                                         |
-| `docs/epics/EPIC-<nn>_*.md`                                                                                         | Approved epic: flows, rules, AC IDs; wins over mockups                                                   |
-| `docs/product/Archipelago_PRD_v1.2.md`                                                                              | Product scope                                                                                            |
-| `docs/design/README.md` + mockups                                                                                   | Visual references, app-shell rule, per-set corrections                                                   |
-| `docs/adr/`                                                                                                         | Only `Accepted` ADRs bind                                                                                |
+| Source                                                                                                              | Role                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` + `layer_rules` (api: `apps/api/AGENTS.md`; web: `apps/web/AGENTS.md`, `apps/web/docs/web-patterns.md`) | Architecture boundaries, coding, testing, security; registry keys, so every stage lists them in `inputs`                                                            |
+| `docs/product/archipelago-business-requirements.md` (BRD)                                                           | Wins on conflict; FR/BR/NFR IDs for traceability                                                                                                                    |
+| `docs/epics/EPIC-<nn>_*.md`                                                                                         | Approved epic: flows, rules, AC IDs; wins over mockups                                                                                                              |
+| `docs/product/Archipelago_PRD_v1.2.md`                                                                              | Product scope, lowest precedence; read by `BACKLOG_SYNC`, `CLARIFICATION`, `SPECIFICATION`, `SPEC_REVIEW`. A contradiction is recorded as "PRD drift", never blocks |
+| `docs/design/README.md` + mockups                                                                                   | Visual references, app-shell rule, per-set corrections                                                                                                              |
+| `docs/adr/`                                                                                                         | Only `Accepted` ADRs bind                                                                                                                                           |
 
 ## At a glance
 

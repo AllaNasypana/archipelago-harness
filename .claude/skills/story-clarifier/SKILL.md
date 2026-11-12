@@ -29,6 +29,7 @@ Resolve paths from `docs/workflow/artifact-paths.yaml`; the orchestrator passes 
 | `story.md`                                                        | The story, its layer, risk, refs, `depends_on`                                                       |
 | `decisions.md` of the active epic                                 | Settled and `OPEN` epic decisions — never re-ask settled                                             |
 | The epic, the BRD rules it cites                                  | Flows, rules, AC wording; BRD wins on conflict                                                       |
+| The PRD (lowest precedence)                                       | Principles (§2), MVP scope and Excluded / Later (§4), journeys (§14): answers `scope` questions      |
 | `docs/design/README.md` (web)                                     | Mockup panels and the corrections that override them                                                 |
 | `docs/adr/`                                                       | Accepted decisions bind; proposed ones are not answers                                               |
 | `AGENTS.md` and the layer's `layer_rules` (`artifact-paths.yaml`) | Boundaries and conventions; web patterns answer UI questions (URL dialogs and filters, error format) |
@@ -137,3 +138,6 @@ An interrupted interview returns nothing; the next `/so:next` resumes from the f
 - If the story is already clear, say so after preparing, record that, and go straight to close.
   Do not manufacture questions.
 - Mockups and placeholders are not requirements; do not infer new fields or limits from them.
+- The PRD never overrides the BRD or the epic. A contradiction is answered from the repo by
+  precedence (AGENTS.md §5.1) and noted under **Out of scope** or **Assumptions** as "PRD drift:
+  <PRD §> vs <rule ID>"; do not ask the human to choose between them.
