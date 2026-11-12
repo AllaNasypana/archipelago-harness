@@ -13,6 +13,8 @@ Activate one story. Runs no stage.
 - Delivery order: every story above it in the backlog table is `DONE` or `DROPPED` (this is
   how foundation stories come first). Otherwise list them and ask the human to confirm starting
   out of order (never in Auto Mode); record the confirmation in the `ACTIVATED` event's `note`.
+- Git: the current branch is `epic.branch` (`git branch --show-current`); otherwise stop and name
+  it.
 - Clean code tree: `git status --porcelain -- apps packages` is empty, so `base_commit` diffs
   only this story. Accepted stories are committed by `/so:approve` (`human-gates.md`); anything
   left is unfinished work: stop, the human commits or stashes it first.
@@ -32,5 +34,5 @@ Never initialize at a later stage than `CLARIFICATION`.
 ## Result
 
 The Orchestration Result: story, layer, risk (and whether `HUMAN_PLAN_APPROVAL` will apply),
-dependency status, current Git branch (report only), and the next command `/so:next`, which
+dependency status, the epic branch, and the next command `/so:next`, which
 starts the clarification interview.

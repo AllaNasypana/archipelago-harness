@@ -12,8 +12,9 @@ Repeat, at most **12 iterations** per call (a story has 9 automated stages plus 
 1. **Re-read** `workflow-state.yaml` and the last `history.jsonl` event from disk. Never rely on
    what an earlier iteration remembers; the files are the only state.
 2. **Stop** (report and end the call) when:
-   - there is no active epic, or the epic is `IN_DELIVERY` with no active story (starting a story
-     is the human's choice: recommend `/so:start <StoryId>`);
+   - there is no active epic, the epic is `DONE`, or it is `IN_DELIVERY` with no active story
+     (starting a story is the human's choice: recommend `/so:start <StoryId>`);
+   - the current branch is not `epic.branch` (name it; never switch branches inside a run);
    - `current_stage` is a human gate (enter it first per `human-gates.md`);
    - `status: BLOCKED` and the blocking issues still hold (`continue-flow.md` step 3), including
      an attempt limit;

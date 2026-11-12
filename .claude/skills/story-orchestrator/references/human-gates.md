@@ -34,8 +34,8 @@ was `PASS`.
    - `HUMAN_BACKLOG_APPROVAL` → effects in `epic-flow.md`.
    - `HUMAN_ACCEPTANCE` → `DONE`: apply the review's **Promote** items (below), set every story
      artifact `APPROVED`, the story `DONE` in `backlog.md`, append `DONE`, reset the story
-     (`state-schema.md` rule 8), check epic done (`epic-flow.md`), **commit** (below), and list
-     the next `READY` stories — especially a web story this api story unblocked.
+     (`state-schema.md` rule 8), **commit** (below), then either enter the epic review (last
+     story) or list the next `READY` stories — especially a web story this api story unblocked.
    - otherwise `status: IN_PROGRESS`.
 
 ### Promote at acceptance
@@ -48,17 +48,33 @@ never promoted: the review names it as an ADR to propose.
 
 ### Commit at acceptance
 
-One commit per accepted story, on the **current branch** (decided OQ-8, 2026-11-12):
+One commit per accepted story, on the **epic branch** (`stage-map.yaml` → `git`):
 
-1. If the current branch is the default branch (`main`), do not commit: say so and leave the
-   tree as is; the human moves the work to a branch.
+1. The current branch must be `epic.branch`; otherwise do not commit (never on `dev` or `main`):
+   say so and leave the tree as is.
 2. Stage the story's changes only: `git add -A -- apps packages docs/stories docs/workflow` plus
    any pattern file a Promote item changed. Anything else changed in the tree is listed for the
    human and not committed.
-3. Message: `feat(<layer>): <story title> (<StoryId>)`, a body with the AC IDs and the review
-   verdict, and the session's commit attribution trailer if one is configured.
+3. Message from `git.story_commit`, e.g.
+
+   ```text
+   feat(api): sign in with email and password (US-01-01-api)
+
+   Epic: EPIC-01
+   ACs: AC-1…AC-5 (LOGIN-AC-02, SES-AC-11, BR-003)
+   Review: PASS, 0 blocking / 3 non-blocking
+   ```
+
+   plus the session's commit attribution trailer if one is configured.
+
 4. Never `--no-verify`. A failing hook: report it; the story stays `DONE`, the tree stays dirty,
    and `/so:start` refuses until the human fixes and commits.
+5. If this was the last open story, enter the epic review (`epic-flow.md` → Epic review).
+
+### `HUMAN_EPIC_ACCEPTANCE`
+
+Approval accepts, merges into `dev` and pushes: `epic-flow.md` → Accepting the epic. Rejection →
+`BACKLOG_SYNC` in `amend` mode with the comment as feedback.
 
 A comment that decides a product question is not applied by you: tell the human it will be
 recorded at the next `CLARIFICATION`, or reject to `CLARIFICATION` now.
@@ -76,6 +92,6 @@ The comment is required. Refuse unless `current_stage` is a human gate.
    the comment as its re-entry on the next `/so:next` and revises its artifact in place (`version + 1`, `DRAFT`),
    so every later gate is passed again.
 
-Both commands invoke no stage Skill; only `/so:approve` at `HUMAN_ACCEPTANCE` touches Git, with
-the one commit above. Finish with the Orchestration Result,
+Both commands invoke no stage Skill. Only `/so:approve` touches Git: the story commit at
+`HUMAN_ACCEPTANCE`, and the accept commit, merge and push at `HUMAN_EPIC_ACCEPTANCE`. Finish with the Orchestration Result,
 including the target stage and the next command.

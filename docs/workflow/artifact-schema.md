@@ -135,6 +135,29 @@ One entry per decision, never renumbered:
 A story whose clarification depends on an `OPEN` decision cannot pass `CLARIFICATION`. A decision
 that is project-wide (AGENTS.md §5 conventions) is not recorded here: it becomes a proposed ADR.
 
+## Epic review (`epic-review.md`)
+
+```yaml
+---
+artifact_type: epic_review
+epic: EPIC-03
+version: 1
+status: DRAFT # APPROVED at HUMAN_EPIC_ACCEPTANCE
+verdict: PASS # PASS | CHANGES_REQUIRED | BLOCKED
+reviewed_commit: 4f2a9c1d7e3b # HEAD of the epic branch the checks ran on (12 chars)
+base_commit: 9b1e0a3c5d77 # dev at review time; the merge preview ran against it
+updated_at: 2026-11-20T09:00:00Z
+produced_by: epic-reviewer
+inputs:
+  - { path: docs/stories/epic-03/backlog.md, version: 4 }
+  - { path: docs/stories/epic-03/decisions.md, version: 6 }
+  - { path: docs/epics/EPIC-03_Goals_Management.md, commit: <12-char sha> }
+---
+```
+
+`/so:approve` at `HUMAN_EPIC_ACCEPTANCE` refuses when the epic branch HEAD is no longer
+`reviewed_commit` (work landed after the review).
+
 ## Files without front matter
 
 `workflow-state.yaml` and `history.jsonl` follow `state-schema.md`.

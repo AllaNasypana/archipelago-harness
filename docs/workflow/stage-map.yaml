@@ -28,10 +28,39 @@ workflow: epic-delivery
 commands:
   epic: '/so:epic <Epic> [feedback]' # activate an epic, or amend its approved backlog
   start: '/so:start <StoryId>' # activate a READY story of the active epic
+  run: '/so:run' # run stages until a human is needed
   next: '/so:next [continue]' # run the current stage; `continue` clears an attempt limit
   status: '/so:status'
   approve: '/so:approve [comment]'
   reject: '/so:reject [target-stage] <comment>'
+
+# -----------------------------------------------------------------------------
+# Git (story-orchestrator is the only Git writer; stage Skills never commit)
+# -----------------------------------------------------------------------------
+git:
+  remote: origin
+  base_branch: dev # epics start from it and merge back into it
+  epic_branch: 'epic/<nn>-<slug>' # local only, never pushed; e.g. epic/01-authentication-user-onboarding
+  slug: >
+    From the epic file name after `EPIC-<nn>_`: words in lowercase, `and` /
+    `the` / `of` dropped, at most 3 words, joined with `-`
+    (EPIC-02_Projects_Management -> projects-management).
+  story_commit: # at HUMAN_ACCEPTANCE, on the epic branch
+    subject: 'feat(<layer>): <story title in lowercase> (<StoryId>)'
+    body:
+      [
+        'Epic: <EPIC-nn>',
+        'ACs: <AC ids> (<rule ids>)',
+        'Review: <verdict>, <n> blocking / <n> non-blocking',
+      ]
+  epic_accept_commit: 'chore(harness): accept <EPIC-nn>' # state + epic review, on the epic branch
+  epic_merge: # at HUMAN_EPIC_ACCEPTANCE: git merge --no-ff into base_branch, then push base_branch
+    subject: 'merge: <EPIC-nn> <epic title>'
+    body: ['Stories: <StoryId>, ...']
+  never: >
+    commit on `main` or `dev`; push anything but `dev` at epic acceptance;
+    force-push, rebase or rewrite pushed history; delete an unmerged branch;
+    `--no-verify`.
 
 # -----------------------------------------------------------------------------
 # Models (automated stages run in subagents; the orchestrator passes `model`)
@@ -113,6 +142,29 @@ epic_stages:
     also_review: [story, epic_decisions] # read via backlog links; story status = backlog Status column
     on_approve: null # epic is IN_DELIVERY; stories become READY
     on_reject: BACKLOG_SYNC # the comment is the feedback for the next version
+
+  # Entered when every story of the backlog is DONE or DROPPED (epic.status: REVIEW).
+  EPIC_REVIEW:
+    type: automated_skill
+    skill: epic-reviewer
+    model: opus
+    fresh_context: true
+    inputs: [backlog, epic_decisions, epic, brd, prd, adr, agents_rules, layer_rules]
+    outputs: [epic_review]
+    next: HUMAN_EPIC_ACCEPTANCE
+    does: >
+      Runs the full checks on the epic branch and reviews the whole epic diff
+      against `base_branch`: every epic AC delivered or explicitly deferred,
+      stories fit together (routes, contracts, shared code), conventions
+      promoted, nothing left OPEN, the merge into `dev` is clean.
+    loop_back:
+      backlog_gap: BACKLOG_SYNC # amend: fix or missing stories, then delivered as usual
+
+  HUMAN_EPIC_ACCEPTANCE:
+    type: human_gate
+    required_artifacts: [epic_review]
+    on_approve: null # epic DONE: accept commit, merge --no-ff into dev, push dev, delete the epic branch
+    on_reject: BACKLOG_SYNC # amend with the comment as feedback
 
 # -----------------------------------------------------------------------------
 # Story stages, in order
@@ -337,7 +389,7 @@ story_stages:
     meaning: >
       A human reviews the diff and the review and accepts the story. Approval
       applies the review's Promote items, marks the story DONE and makes one
-      commit on the current branch (never the default branch).
+      commit on the epic branch (git.story_commit; never on dev or main).
     on_approve: DONE
     on_reject: IMPLEMENTATION
     reject_targets: [SPECIFICATION, PLANNING, TEST_FIRST, IMPLEMENTATION]
@@ -348,7 +400,7 @@ story_stages:
     does: >
       Sets the story DONE in backlog.md, clears the active story and appends to
       history. Artifacts stay in place. When every story of the epic is DONE or
-      DROPPED, the epic becomes DONE.
+      DROPPED, the epic goes to REVIEW and its next stage is EPIC_REVIEW.
 
 # -----------------------------------------------------------------------------
 # Rules

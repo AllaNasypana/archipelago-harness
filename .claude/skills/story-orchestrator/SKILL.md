@@ -4,7 +4,7 @@ description: >
   Coordinates Archipelago's epic-delivery workflow: activates an epic and runs its BACKLOG_SYNC,
   activates one story at a time, routes the active stage to exactly one Skill (the api or web
   implementor by layer) in a fresh subagent, records each transition, and stops at every human
-  gate; commits an accepted story. Modes: epic, start, run, continue, status, gate decisions. Use
+  gate; owns Git: epic branch, story commits, merge into dev. Modes: epic, start, run, continue, status, gate decisions. Use
   for /so:epic, /so:start, /so:run, /so:next, /so:status, /so:approve, /so:reject, or whenever
   someone asks to start, run, resume, inspect, approve or reject workflow work.
 argument-hint: <epic|start|run|continue|status|approve|reject> [Epic|StoryId|comment]
@@ -154,9 +154,10 @@ reset the story as `DONE` does (`state-schema.md` rule 8) without marking it `DO
 Never: pass or infer a human gate (a review `PASS` is not approval); resolve decisions; change
 requirements; do stage work (except applying the review's human-approved **Promote** text
 verbatim at acceptance, `human-gates.md`); invoke more than one stage Skill per step; delete or
-move artifacts or history; commit anything but the one accepted-story commit (`human-gates.md`);
-push, branch or open PRs; commit on the default branch; run destructive database commands; bypass
-hooks (`--no-verify`); log secrets. Auto Mode never passes a gate and
+move artifacts or history; use Git beyond `stage-map.yaml` → `git` (create the epic branch, one
+commit per accepted story, the accept commit, `--no-ff` merge into `dev`, push `dev`, delete the
+merged epic branch — nothing else: no other push, no force, rebase, PR, or commit on `dev` /
+`main`); run destructive database commands; bypass hooks (`--no-verify`); log secrets. Auto Mode never passes a gate and
 never runs `CLARIFICATION`.
 
 ## Orchestration Result

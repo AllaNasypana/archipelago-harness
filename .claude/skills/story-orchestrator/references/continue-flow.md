@@ -5,6 +5,8 @@ Advance by **at most one** stage.
 1. **Resolve state.** Read `workflow-state.yaml`.
    - No epic → stop: "run /so:epic <Epic>".
    - Epic `IN_DELIVERY`, no story → stop: list `READY` stories, recommend `/so:start <StoryId>`.
+   - Epic `REVIEW` → the current stage is `EPIC_REVIEW` or `HUMAN_EPIC_ACCEPTANCE`; go on.
+   - Epic `DONE` → stop: recommend `/so:epic <next Epic>`.
    - Inconsistent state (SKILL.md invariants) → `BLOCKED`, stop.
 2. **Human gate?** Invoke nothing. Stale routing (step 4) applies here first. If `pending_human_gate` is empty, enter the gate
    (`human-gates.md`); if `PENDING`, re-report it. Stop.

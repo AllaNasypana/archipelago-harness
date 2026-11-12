@@ -43,7 +43,7 @@ an ADR.
 
 - **amend** — the backlog is `APPROVED` and the human asks for a change during delivery: a split
   proposed at `CLARIFICATION`, a new api story for a contract gap, deferred stories that are now
-  unblocked. Add new stories as `PROPOSED` with new IDs (next free `<nn>`, never reused), placed
+  unblocked, fix stories named by `EPIC_REVIEW` or a rejected epic acceptance. Add new stories as `PROPOSED` with new IDs (next free `<nn>`, never reused), placed
   before the stories that need them; update coverage; bump `version`, `status: DRAFT`. A `READY`
   story the change replaces goes under **Amendment → Drop on approval** with the reason (the
   orchestrator drops it on approval). Never edit a story that is `READY`, `ACTIVE`, `DONE` or

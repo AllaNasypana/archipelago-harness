@@ -24,7 +24,8 @@ Rules:
 
 - An artifact is revised in place: its owner increments `version` and resets `status: DRAFT`.
   Git keeps the old text; there are no superseded copies.
-- On `/so:approve` the orchestrator sets the gate's `required_artifacts` to `APPROVED`; on `DONE`
+- On `/so:approve` the orchestrator sets the gate's `required_artifacts` to `APPROVED` (also
+  `epic_review` at `HUMAN_EPIC_ACCEPTANCE`); on `DONE`
   it sets every artifact of the story to `APPROVED`. `story-clarifier` sets `clarification` to
   `APPROVED` itself, because the human confirms inside the stage.
 - A Skill never changes the status of an artifact it does not own (except the orchestrator as
@@ -105,11 +106,12 @@ Human gates and `DONE` are **stages**, not verdicts. The history markers (`HUMAN
 
 ## 4. Epic status
 
-| Value         | Meaning                                                                 |
-| ------------- | ----------------------------------------------------------------------- |
-| `BACKLOG`     | `BACKLOG_SYNC` or `HUMAN_BACKLOG_APPROVAL` is current (also an amend).  |
-| `IN_DELIVERY` | Backlog approved; stories are activated one at a time with `/so:start`. |
-| `DONE`        | Every story is `DONE` or `DROPPED`; an amend can reopen it.             |
+| Value         | Meaning                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| `BACKLOG`     | `BACKLOG_SYNC` or `HUMAN_BACKLOG_APPROVAL` is current (also an amend).                     |
+| `IN_DELIVERY` | Backlog approved; stories are activated one at a time with `/so:start`.                    |
+| `REVIEW`      | Every story `DONE` or `DROPPED`; `EPIC_REVIEW` or `HUMAN_EPIC_ACCEPTANCE` is current.      |
+| `DONE`        | Accepted at `HUMAN_EPIC_ACCEPTANCE`, merged into `dev` and pushed; an amend can reopen it. |
 
 ---
 

@@ -25,12 +25,14 @@ does the same way (inputs, re-entry, output, result) is in [`stage-contract.md`]
 ## At a glance
 
 ```text
-/so:epic EPIC-03
+/so:epic EPIC-03          (creates epic/03-goals-management from dev)
   BACKLOG_SYNC ─▶ HUMAN_BACKLOG_APPROVAL                      once per epic
 /so:start US-03-02-api   (then /so:run; /so:approve at each gate; /so:run again)
   CLARIFICATION ─▶ SPECIFICATION ─▶ SPEC_REVIEW ─▶ HUMAN_SPEC_APPROVAL
   ─▶ PLANNING ─▶ HUMAN_PLAN_APPROVAL (risk: high only)
-  ─▶ TEST_FIRST ─▶ IMPLEMENTATION ─▶ REVIEW ─▶ HUMAN_ACCEPTANCE ─▶ DONE
+  ─▶ TEST_FIRST ─▶ IMPLEMENTATION ─▶ REVIEW ─▶ HUMAN_ACCEPTANCE ─▶ DONE   (one commit)
+… every story DONE or DROPPED:
+  EPIC_REVIEW ─▶ HUMAN_EPIC_ACCEPTANCE                        merge --no-ff into dev, push dev
 ```
 
 Everything lives under `docs/stories/epic-<nn>/`:
@@ -183,7 +185,17 @@ verbatim, then reviews in three parts:
 You then read the diff and `review.md` and accept the story. `DONE` marks it in `backlog.md` and
 frees the workflow for the next `/so:start`. Approval also applies the review's **Promote**
 items (conventions later stories must follow go to `apps/<layer>/docs/<layer>-patterns.md` or
-`AGENTS.md`) and makes one commit for the story on the current branch.
+`AGENTS.md`) and makes one commit for the story on the epic branch (`feat(<layer>): …`).
+
+## Closing an epic
+
+When the last story is `DONE`, `EPIC_REVIEW` (fresh subagent, `opus`) runs the full checks on the
+epic branch and reviews the whole epic diff against `dev`: every epic AC delivered or deferred,
+stories fit together, conventions promoted, merge preview clean. Missing or broken work goes back
+to `BACKLOG_SYNC` as an amend (fix stories, delivered as usual). At `HUMAN_EPIC_ACCEPTANCE` you read
+`epic-review.md` and the epic diff; `/so:approve` commits the acceptance on the epic branch,
+merges it `--no-ff` into `dev`, pushes `dev` and deletes the local epic branch. Then
+`/so:epic <next>` starts the next epic from `dev`.
 
 ## Running the flow
 
@@ -195,7 +207,7 @@ you may `/clear` at any gate and continue with `/so:run`. `/so:next` does exactl
 debugging the flow.
 
 **Models.** Each automated stage names its model in `stage-map.yaml`: `opus` for
-`BACKLOG_SYNC`, `SPEC_REVIEW` and `REVIEW`; `sonnet` for `SPECIFICATION` and `PLANNING` (`opus`
+`BACKLOG_SYNC`, `SPEC_REVIEW`, `REVIEW` and `EPIC_REVIEW`; `sonnet` for `SPECIFICATION` and `PLANNING` (`opus`
 when the story is `risk: high`), `TEST_FIRST` and `IMPLEMENTATION`. A re-entered or repeated stage
 escalates to `opus`. `CLARIFICATION` uses your session model. Every history event records the
 model, so the split can be tuned after an epic from where loop-backs actually happened.
@@ -266,13 +278,13 @@ generated client drift, `en`/`uk` key completeness, Playwright e2e (ADR-001).
 
 ## Decisions and open questions
 
-| ID   | Topic                 | Status      | Decision                                                                                                                                                  |
-| ---- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OQ-1 | Story source          | **decided** | `BACKLOG_SYNC` cuts the active epic into stories under `docs/stories/epic-<nn>/` (user, 2026-11-11)                                                       |
-| OQ-2 | Design stages         | **decided** | Design is a section of `spec.md` per layer; replaces the separate `UI_DESIGN` stage (user, 2026-11-11)                                                    |
-| OQ-3 | Implementor           | **decided** | One `IMPLEMENTATION` stage, Skill chosen by `layer` (user, 2026-11-09)                                                                                    |
-| OQ-4 | Web test runner / e2e | **decided** | Vitest + Testing Library; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md)                                                    |
-| OQ-5 | Command prefix        | **decided** | `/so:` (user, 2026-11-09)                                                                                                                                 |
-| OQ-6 | Story ID format       | **decided** | `US-<epic>-<nn>-<layer>` (user, 2026-11-09)                                                                                                               |
-| OQ-7 | Workflow size         | **decided** | Compact flow, plan gate for `risk: high` only (user, 2026-11-11)                                                                                          |
-| OQ-8 | Git after acceptance  | **decided** | `/so:approve` at `HUMAN_ACCEPTANCE` makes one commit per story on the current branch, never on `main`; push and PR stay with the human (user, 2026-11-12) |
+| ID   | Topic                 | Status      | Decision                                                                                                                                                                                                                                                                       |
+| ---- | --------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OQ-1 | Story source          | **decided** | `BACKLOG_SYNC` cuts the active epic into stories under `docs/stories/epic-<nn>/` (user, 2026-11-11)                                                                                                                                                                            |
+| OQ-2 | Design stages         | **decided** | Design is a section of `spec.md` per layer; replaces the separate `UI_DESIGN` stage (user, 2026-11-11)                                                                                                                                                                         |
+| OQ-3 | Implementor           | **decided** | One `IMPLEMENTATION` stage, Skill chosen by `layer` (user, 2026-11-09)                                                                                                                                                                                                         |
+| OQ-4 | Web test runner / e2e | **decided** | Vitest + Testing Library; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md)                                                                                                                                                                         |
+| OQ-5 | Command prefix        | **decided** | `/so:` (user, 2026-11-09)                                                                                                                                                                                                                                                      |
+| OQ-6 | Story ID format       | **decided** | `US-<epic>-<nn>-<layer>` (user, 2026-11-09)                                                                                                                                                                                                                                    |
+| OQ-7 | Workflow size         | **decided** | Compact flow, plan gate for `risk: high` only (user, 2026-11-11)                                                                                                                                                                                                               |
+| OQ-8 | Git flow              | **decided** | Epic branch `epic/<nn>-<slug>` from `dev` (local); one commit per accepted story on it; `EPIC_REVIEW` + `HUMAN_EPIC_ACCEPTANCE`, then `--no-ff` merge into `dev` and push `dev`; never commit on `dev`/`main`, never force (user, 2026-11-12). Rules: `stage-map.yaml` → `git` |

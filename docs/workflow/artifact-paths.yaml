@@ -61,6 +61,13 @@ artifacts:
       Product decisions shared by the stories of one epic, so a web story
       inherits what its api story settled. Project-wide conventions go to ADRs.
 
+  epic_review:
+    pattern: docs/stories/epic-{epic}/epic-review.md
+    owner: epic-reviewer
+    note: >
+      The review of the whole epic before it merges into `dev`: checks run on
+      the epic branch, epic AC delivery, cross-story fit, merge preview.
+
   # --- Story level -----------------------------------------------------------
   story:
     pattern: docs/stories/epic-{epic}/{story_id}/story.md

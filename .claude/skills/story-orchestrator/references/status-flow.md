@@ -14,7 +14,9 @@
 - `OPEN` epic decisions affecting the story; `TODO`/`TBD` in `APPROVED` inputs.
 - Pending gate: artifacts to read and the exact commands.
 - Blocking issues; non-blocking findings count.
-- Git branch and uncommitted changes (report only).
+- Git: current branch vs `epic.branch`, uncommitted changes, commits on the epic branch ahead of
+  `dev`. `INCONSISTENT` when the branch differs, or when the epic is `DONE` but its branch still
+  exists unmerged (an acceptance stopped after the accept commit: name the remaining commands).
 - The recommended next command.
 
 When no story is active: list `READY` stories in backlog order, marking web stories whose api

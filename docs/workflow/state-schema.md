@@ -23,6 +23,7 @@ epic: # null when no epic is active
   id: EPIC-03
   status: IN_DELIVERY # see Epic status
   backlog: docs/stories/epic-03/backlog.md
+  branch: epic/03-goals-management # stage-map.yaml → git.epic_branch; created at activation
   activated_at: 2026-11-11T09:00:00Z
 story: # null between stories
   id: US-03-02-web
@@ -117,7 +118,8 @@ One JSON object per line, append-only, never rewritten — except an epic restar
 ```
 
 `verdict` is a stage verdict or a lifecycle marker: `EPIC_ACTIVATED`, `BACKLOG_APPROVED`,
-`ACTIVATED`, `HUMAN_APPROVED`, `HUMAN_REJECTED`, `SKIPPED`, `DONE`, `EPIC_DONE`, `BACKLOG_AMEND`,
+`ACTIVATED`, `HUMAN_APPROVED`, `HUMAN_REJECTED`, `SKIPPED`, `DONE`, `EPIC_REVIEW_STARTED`,
+`EPIC_ACCEPTED`, `EPIC_DONE`, `BACKLOG_AMEND`,
 `PARKED`, `CONTINUED`, `STALE_INPUT`. Epic-stage
 events have `story: null`. For human decisions `skill` and `model` are `null` and `note` holds the comment. `model` is the
 model an automated stage ran on (`stage-map.yaml` → `models`), `"session"` for `CLARIFICATION`.
