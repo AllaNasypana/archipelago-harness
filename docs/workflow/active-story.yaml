@@ -1,9 +1,0 @@
-# Identity of the active story. Schema: docs/workflow/state-schema.md
-# Writer: story-orchestrator only.
-version: 1
-active_story: null
-layer: null
-depends_on: null
-story_path: null
-activated_at: null
-activated_by: null

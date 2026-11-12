@@ -1,195 +1,290 @@
-# Workflow Stages (Explanatory) — DRAFT
+# Workflow Stages (Explanatory)
 
-> **Status:** v0.5 (2026-11-09), adapted from `ai/customer-portal/docs/workflow/stages.md`.
-> **Normative definition:** [`stage-map.yaml`](stage-map.yaml) (status `draft` until the stage Skills
-> and `artifact-paths.yaml` exist). This file is explanatory; if it disagrees with `stage-map.yaml`,
-> `stage-map.yaml` wins. Do not define stage identifiers anywhere else.
+> **Status:** v2 draft (2026-11-11), adapted from `ai/customer-portal`.
+> **Normative definition:** [`stage-map.yaml`](stage-map.yaml). This file explains it; if they
+> disagree, `stage-map.yaml` wins. Do not define stages or routing anywhere else.
 
-The story-delivery workflow moves **one active User Story** from the backlog to an archived,
-merged delivery for the Archipelago monorepo (`apps/web` Next.js + thin BFF, `apps/api` NestJS
-modular monolith, Prisma, PostgreSQL). Each automated stage is executed by exactly one Skill and
-produces artifacts addressed by registry keys in [`artifact-paths.yaml`](artifact-paths.yaml). All
-artifacts of one story live in one folder, `docs/stories/{story_id}/` (e.g. `docs/stories/US-03-02-api/spec.md`).
-Human gates stop the workflow until a person records a decision with `/so:approve` or
-`/so:reject`. Only `story-orchestrator` records transitions; stage Skills never edit workflow
-state.
+The workflow delivers **one epic at a time**, as small stories, **one story at a time**. An epic
+is cut into stories once; each story then goes from clarification to human acceptance. Each
+automated stage is run by exactly one Skill and writes artifacts addressed by registry keys in
+[`artifact-paths.yaml`](artifact-paths.yaml). Only `story-orchestrator` records transitions;
+stage Skills never edit workflow state. A review `PASS` is never human approval. What every stage Skill
+does the same way (inputs, re-entry, output, result) is in [`stage-contract.md`](stage-contract.md).
 
 ## Sources every stage reads
 
-| Source                                                    | Role                                                               |
-| --------------------------------------------------------- | ------------------------------------------------------------------ |
-| `AGENTS.md`                                               | Architecture boundaries, coding, testing and security rules        |
-| `docs/product/archipelago-business-requirements.md` (BRD) | Resolves conflicts between sources; FR/BR/NFR IDs for traceability |
-| `docs/product/Archipelago_PRD_v1.2.md`                    | Product scope                                                      |
-| `docs/epics/EPIC-0X_*.md`                                 | Approved epic specifications; win over mockups                     |
-| `docs/design/README.md` + mockups                         | Visual references, app-shell rule, per-set corrections             |
-| `docs/adr/`                                               | Accepted architecture decisions (none yet)                         |
+| Source                                                                                                                                               | Role                                                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` + `layer_rules` (api: `apps/api/AGENTS.md`, `apps/api/docs/api-patterns.md`; web: `apps/web/AGENTS.md`, `apps/web/docs/web-patterns.md`) | Architecture boundaries, coding, testing, security; registry keys, so every stage lists them in `inputs`                                                            |
+| `docs/product/archipelago-business-requirements.md` (BRD)                                                                                            | Wins on conflict; FR/BR/NFR IDs for traceability                                                                                                                    |
+| `docs/epics/EPIC-<nn>_*.md`                                                                                                                          | Approved epic: flows, rules, AC IDs; wins over mockups                                                                                                              |
+| `docs/product/Archipelago_PRD_v1.2.md`                                                                                                               | Product scope, lowest precedence; read by `BACKLOG_SYNC`, `CLARIFICATION`, `SPECIFICATION`, `SPEC_REVIEW`. A contradiction is recorded as "PRD drift", never blocks |
+| `docs/design/README.md` + mockups                                                                                                                    | Visual references, app-shell rule, per-set corrections                                                                                                              |
+| `docs/adr/`                                                                                                                                          | Only `Accepted` ADRs bind                                                                                                                                           |
 
-## Before the workflow: slicing an epic into stories
+## At a glance
 
-Stories do not exist yet; they are cut from approved epics by the epic-level Skill
-**`story-slicer`**. It runs once per epic (or when an epic changes), **outside** the per-story
-loop, and writes the proposed story list to `docs/stories/slices/EPIC-<nn>-slice.md`. A human
-approves the slice before any story is activated. `BACKLOG_SYNC` then creates
-`docs/stories/{story_id}/story.md` and the catalog from the slice, or imports the story from
-GitHub Issues when that source is configured.
+```text
+/so:epic EPIC-03          (creates epic/03-goals-management from dev)
+  BACKLOG_SYNC ─▶ HUMAN_BACKLOG_APPROVAL                      once per epic
+/so:start US-03-02-api   (then /so:run; /so:approve at each gate; /so:run again)
+  CLARIFICATION ─▶ SPECIFICATION ─▶ SPEC_REVIEW ─▶ HUMAN_SPEC_APPROVAL
+  ─▶ PLANNING ─▶ HUMAN_PLAN_APPROVAL (risk: high only)
+  ─▶ TEST_FIRST ─▶ IMPLEMENTATION ─▶ REVIEW ─▶ HUMAN_ACCEPTANCE ─▶ DONE   (one commit)
+… every story DONE or DROPPED:
+  EPIC_REVIEW ─▶ HUMAN_EPIC_ACCEPTANCE                        merge --no-ff into dev, push dev
+```
 
-### Small stories
+Everything lives under `docs/stories/epic-<nn>/`:
 
-A story is small when **all** of these hold:
+```text
+docs/stories/epic-03/
+  backlog.md        story table (the catalog), epic AC coverage, open questions
+  decisions.md      product decisions shared by the epic's stories
+  US-03-02-api/     story.md  clarification.md  spec.md  spec-review.md
+                    plan.md  tests.md  implementation.md  review.md
+```
 
-- one user-visible behavior, or one cohesive API capability;
-- at most ~5 acceptance criteria, each testable on its own;
+## Epic level
+
+### `BACKLOG_SYNC` — `backlog-sync`
+
+Cuts the epic into stories and writes `backlog.md` (every story `PROPOSED`), every `story.md` and the
+first `decisions.md` with product questions the epic leaves open. Questions about project-wide
+conventions (error format, pagination, IDs, dates, logging — AGENTS.md §5) are proposed as ADRs,
+not decided per epic.
+
+**Small story** — all of these hold:
+
+- one user-visible behavior or one cohesive API capability;
+- 2–5 acceptance criteria, each testable on its own;
 - one backend module **or** one web feature folder;
-- reviewable in one sitting: aim for a diff of a few hundred lines, excluding generated code;
-- traced to concrete BRD FR/BR IDs and epic AC IDs.
+- reviewable in one sitting: a few hundred changed lines, excluding generated code;
+- traced to BRD FR/BR IDs and epic AC IDs.
 
-If a candidate breaks a rule, split it: by state (happy path / validation / error), by
-operation (create / edit / archive), or by role of the data (write / read).
+Too big → split by state (happy path / validation / errors), by operation (create / edit /
+archive) or by data role (write / read).
 
-### Backend and frontend stories
+**One layer per story:**
 
-Every story has exactly one **`layer`**:
+| `layer` | Scope                                                                                                                                        | Never contains                    |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `api`   | `apps/api`: domain, use cases, Prisma `app`, REST endpoints with Swagger decorators, regenerated client, shared validation vectors (ADR-004) | Pages, components, BFF handlers   |
+| `web`   | `apps/web`: pages, components, forms, hooks, BFF route handlers, `bff` schema, `en`/`uk` strings                                             | NestJS code, `app` schema changes |
 
-| `layer` | Scope                                                                                                                    | Never contains                    |
-| ------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
-| `api`   | `apps/api`: domain, use cases, Prisma (`app` schema), REST endpoint, OpenAPI contract, regenerated `packages/api-client` | Pages, components, BFF handlers   |
-| `web`   | `apps/web`: pages, components, forms, BFF route handlers, `bff` schema (sessions), i18n strings                          | NestJS code, `app` schema changes |
+- A user-facing capability is usually a pair, `US-03-02-api` then `US-03-02-web`.
+- The web story names the api story in `depends_on` and starts only when it is `DONE`. OpenAPI is
+  generated from NestJS code, so the contract is the merged endpoint plus the regenerated
+  `packages/api-client` and the shared validation vectors the web form imports (ADR-004).
+- Every web stage from `CLARIFICATION` to `REVIEW` reads the api story's `spec.md`
+  (`dependency_spec`).
+- Pure backend work (outbox) and pure UI work (app shell) are single stories.
+- Foundation work no epic owns gets a `US-00` ID, lives in `epic-00/` and is delivered inside
+  the epic that first needs it.
 
-Rules:
+**Risk.** A story is `risk: high` when it touches authentication, sessions, cookies or the BFF
+token boundary; adds or changes a migration; spans more than one module or runs a cross-module
+transaction; or changes authorization or the outbox. High risk makes `HUMAN_PLAN_APPROVAL`
+mandatory.
 
-- A user-facing capability is usually a pair, e.g. `US-03-02-api` then `US-03-02-web` (OQ-6).
-- A `web` story **depends on** its `api` story: it may start only when that story's `openapi`
-  artifact is `APPROVED`; it may merge only after the `api` story is `COMPLETED`.
-- The contract between them is the OpenAPI document and the generated client — nothing else.
-- Pure backend work (outbox, email adapter) and pure UI work (app shell, design tokens) are single
-  stories without a pair.
+### `HUMAN_BACKLOG_APPROVAL`
 
-## Stage sequence
+You review the split, order, dependencies and risk once per epic. Approve → stories become
+`READY`. Reject with a comment → `BACKLOG_SYNC` writes a new version.
 
-| #   | Stage                         | Type             | Owner Skill                              | Applies to | Produces (registry keys)                                    |
-| --- | ----------------------------- | ---------------- | ---------------------------------------- | ---------- | ----------------------------------------------------------- |
-| 1   | `BACKLOG_SYNC`                | skill            | `backlog-sync`                           | both       | `story`, `story_catalog`                                    |
-| 2   | `CLARIFICATION`               | skill            | `us-clarifier`                           | both       | `clarification_report`, `open_decisions`                    |
-| 3   | `SPECIFICATION`               | skill            | `spec-writer`                            | both       | `specification`                                             |
-| 4   | `SPEC_REVIEW`                 | skill            | `spec-verifier`                          | both       | `specification_review`                                      |
-| 5   | `HUMAN_SPEC_APPROVAL`         | human gate       | human                                    | both       | —                                                           |
-| 6   | `API_DESIGN`                  | skill (optional) | `openapi-designer`                       | `api`      | `api_design`, `openapi`                                     |
-| 7   | `DB_DESIGN`                   | skill (optional) | `db-designer`                            | `api`¹     | `database_design`, `entity_model`                           |
-| 8   | `UI_DESIGN`                   | skill (optional) | `ui-designer`                            | `web`      | `ui_design`                                                 |
-| 9   | `DESIGN_REVIEW`               | skill (optional) | `design-reviewer`                        | both       | `design_review`                                             |
-| 10  | `IMPACT_ANALYSIS`             | skill            | `impact-analyzer`                        | both       | `impact_analysis`                                           |
-| 11  | `IMPLEMENTATION_PLANNING`     | skill            | `implementation-planner`                 | both       | `implementation_plan`                                       |
-| 12  | `PLAN_REVIEW`                 | skill            | `plan-reviewer`                          | both       | `plan_review`                                               |
-| 13  | `HUMAN_PLAN_APPROVAL`         | human gate       | human                                    | both       | —                                                           |
-| 14  | `TEST_WRITING`                | skill            | `test-writer`                            | both       | `test_strategy`, `ac_test_matrix`, `test_generation_report` |
-| 15  | `IMPLEMENTATION`              | skill            | `nest-implementor` / `next-implementor`² | both       | `implementation_report`                                     |
-| 16  | `IMPLEMENTATION_VERIFICATION` | skill            | `implementation-verifier`                | both       | `implementation_verification`                               |
-| 17  | `SECURITY_REVIEW`             | skill            | `security-reviewer`                      | both       | `security_review`                                           |
-| 18  | `RECONCILIATION`              | skill            | `reconciliation-reviewer`                | both       | `reconciliation`, `traceability`                            |
-| 19  | `HUMAN_PR_APPROVAL`           | human gate       | human                                    | both       | —                                                           |
-| 20  | `PR_PREPARATION`              | skill            | `pr-preparer`                            | both       | `pr_summary`                                                |
-| 21  | `READY_FOR_PR`                | human gate       | human                                    | both       | —                                                           |
-| 22  | `COMPLETED`                   | human gate       | human                                    | both       | —                                                           |
-| 23  | `ARCHIVED`                    | terminal         | `story-orchestrator`                     | both       | `delivery_summary`                                          |
+**Amend.** During delivery, `/so:epic <Epic> <feedback>` changes an approved backlog: a split
+proposed at `CLARIFICATION`, a new api story for a contract gap, deferred stories that are now
+unblocked. A `BLOCKED` active story is parked (back to `READY`). Started stories never change;
+a replaced `READY` story becomes `DROPPED`. The backlog passes this gate again.
 
-¹ A `web` story runs `DB_DESIGN` only when it changes the `bff` session schema.
-² The orchestrator picks the Skill by `story.layer`; the stage itself is one. This replaces
-customer-portal's `springboot-implementor`.
+## Story level
 
-What changed against customer-portal: the `layer` field and its routing, the new `UI_DESIGN`
-stage, Next.js/NestJS implementors, Prisma schema ownership in `DB_DESIGN`, real repo commands in
-verification, and traceability to BRD/epic IDs in `RECONCILIATION`.
+| #   | Stage                 | Skill                                    | Writes                     |
+| --- | --------------------- | ---------------------------------------- | -------------------------- |
+| 1   | `CLARIFICATION`       | `story-clarifier` (interactive)          | `clarification.md`¹        |
+| 2   | `SPECIFICATION`       | `spec-writer`                            | `spec.md`                  |
+| 3   | `SPEC_REVIEW`         | `spec-reviewer` (fresh context)          | `spec-review.md`           |
+| 4   | `HUMAN_SPEC_APPROVAL` | human                                    | —                          |
+| 5   | `PLANNING`            | `implementation-planner`                 | `plan.md`                  |
+| 6   | `HUMAN_PLAN_APPROVAL` | human, only for `risk: high`             | —                          |
+| 7   | `TEST_FIRST`          | `test-writer`                            | tests + `tests.md`         |
+| 8   | `IMPLEMENTATION`      | `nest-implementor` / `next-implementor`² | code + `implementation.md` |
+| 9   | `REVIEW`              | `story-reviewer` (fresh context)         | `review.md`                |
+| 10  | `HUMAN_ACCEPTANCE`    | human                                    | —                          |
+| 11  | `DONE`                | `story-orchestrator`                     | backlog status             |
 
-## Optional design stages
+¹ Also applies the confirmed changes to `story.md` and records epic-wide answers in `decisions.md`.
+² Chosen by `story.layer`.
 
-A design stage emits `NOT_APPLICABLE` when it does not apply to the story's `layer`, or when the
-approved Specification explicitly says the area does not change. The reason is recorded.
+### `CLARIFICATION`
 
-| Stage           | Not applicable when the Story…                                                |
-| --------------- | ----------------------------------------------------------------------------- |
-| `API_DESIGN`    | is `web`, or does not change NestJS endpoints, DTOs or error responses        |
-| `DB_DESIGN`     | does not change the `app` or `bff` schema                                     |
-| `UI_DESIGN`     | is `api`, or has no user-visible change                                       |
-| `DESIGN_REVIEW` | all three design stages were `NOT_APPLICABLE`; still writes a one-line review |
+Based on customer-portal's `story-clarifier`: an interview, not a report. It needs you live;
+Auto Mode stops here.
 
-`API_DESIGN` is contract-first (AGENTS.md §3.11): OpenAPI and DTOs are agreed before code.
+1. Reads the story, epic, BRD, design index, ADRs, `decisions.md` and — for a web story — the api
+   dependency's `spec.md`. Whatever these answer is recorded as `answered-from-repo` with its
+   source; you can veto it.
+2. Writes `clarification.md` before the first question: hypothesis and candidate questions,
+   blocking ones first.
+3. Asks **one question at a time**, each with a recommended answer and why it matters, and
+   updates the file after every answer. An interrupted interview resumes from the file.
+4. Question categories follow the layer:
+   - **api** — business rules and invariants, authorization, validation limits, error responses,
+     uniqueness and concurrency, persistence changes, what the endpoint returns.
+   - **web** — UI states (loading, empty, error, success), mockup panels and corrections, `en`/`uk`
+     wording, 360 px, navigation, how the BFF surfaces api errors.
+   - **both** — scope and out of scope, terminology, dependencies.
+5. A web story **inherits** its api story's decisions; it does not ask them again.
+6. Ends with a short restatement and your explicit "yes". Then it applies the agreed changes to
+   `story.md`, marks `clarification.md` `APPROVED` and returns `PASS`. No clear yes → `BLOCKED`.
 
-`UI_DESIGN` must:
+### `SPECIFICATION` — the design lives here
 
-- take the header, sidebar and profile menu only from `docs/design/mockups/general/` (BRD D17);
-- list the mockup panels used and apply the corrections recorded in the epic and `docs/design/README.md`;
-- use the epic text alone where the index says so (EPIC-06 10–12, EPIC-07 05–12);
-- reuse tokens from `apps/web/src/styles/theme.css` and classes from `components.css`; new tokens or
-  classes are listed explicitly;
-- list every new UI string key for both `en` and `uk`;
-- cover loading, empty, error and success states, and the 360 px rule where BRD D9 requires it.
+`spec.md` has testable ACs (Given/When/Then, with rule IDs), out of scope, and one **design
+section for the story's layer**:
+
+- **api** — endpoints (method, path, auth), request/response DTOs with validation, error
+  responses, authorization rule, domain rules, Prisma changes and migration. Contract first
+  (AGENTS.md §3.11): the DTOs and decorators are designed here, the OpenAPI document is
+  generated from them.
+- **web** — route, components, form fields and the Zod mirror of server validation, UI states,
+  mockup panels used with corrections applied, `en`/`uk` keys, BFF route handlers and api client
+  calls. Header, sidebar and profile menu come only from `docs/design/mockups/general/` (BRD
+  D17); use epic text alone where the design index says so; reuse `theme.css` tokens and
+  `components.css` classes and list any new one.
+
+It restates `risk` and raises it when a risk rule applies.
+
+### `SPEC_REVIEW` → `HUMAN_SPEC_APPROVAL`
+
+A fresh-context reviewer checks that every story AC is covered and testable, the design obeys
+AGENTS.md boundaries, and nothing is invented beyond the clarification. Then you approve the spec.
+
+### `PLANNING` → `HUMAN_PLAN_APPROVAL`
+
+`plan.md`: files to add or change, impact on existing code, migration steps, and the **AC → test
+matrix** (test level and file per AC). The gate is skipped for `risk: normal`; the plan is still
+checked by `REVIEW` against the diff.
+
+### `TEST_FIRST` → `IMPLEMENTATION`
+
+Tests are written from the matrix and must fail for the right reason (red). The implementor makes
+them pass (green), never edits a test to hide a defect, and regenerates `packages/api-client`
+when an api story changes an endpoint.
+
+### `REVIEW` → `HUMAN_ACCEPTANCE` → `DONE`
+
+`story-reviewer` runs in a fresh context. It first runs the checks below and records the output
+verbatim, then reviews in three parts:
+
+- **correctness** — every AC has a passing test, and the diff matches the spec and the plan;
+- **security** — BFF boundary and token isolation, cookies (CSRF, fixation, revocation), NestJS
+  authorization on every resource, `app`/`bff` isolation, secrets and logging (AGENTS.md §3, §7);
+- **readability** — the code quality bar below.
+
+You then read the diff and `review.md` and accept the story. `DONE` marks it in `backlog.md` and
+frees the workflow for the next `/so:start`. Approval also applies the review's **Promote**
+items (conventions later stories must follow go to `apps/<layer>/docs/<layer>-patterns.md` or
+`AGENTS.md`) and makes one commit for the story on the epic branch (`feat(<layer>): …`).
+
+## Closing an epic
+
+When the last story is `DONE`, `EPIC_REVIEW` (fresh subagent, `opus`) runs the full checks on the
+epic branch and reviews the whole epic diff against `dev`: every epic AC delivered or deferred,
+stories fit together, conventions promoted, merge preview clean. Missing or broken work goes back
+to `BACKLOG_SYNC` as an amend (fix stories, delivered as usual). At `HUMAN_EPIC_ACCEPTANCE` you read
+`epic-review.md` and the epic diff; `/so:approve` commits the acceptance on the epic branch,
+merges it `--no-ff` into `dev`, pushes `dev` and deletes the local epic branch. Then
+`/so:epic <next>` starts the next epic from `dev`.
+
+## Running the flow
+
+`/so:run` drives a story from where it stands to the next point that needs you: a human gate,
+the `CLARIFICATION` interview (it runs in your session, then the run continues), a block, an
+attempt limit, or 12 stages. Every automated stage runs in a fresh subagent, so stages never share
+working context, and the orchestrator keeps only the one-line results. Everything lives on disk:
+you may `/clear` at any gate and continue with `/so:run`. `/so:next` does exactly one stage, for
+debugging the flow.
+
+**Models.** Each automated stage names its model in `stage-map.yaml`: `opus` for
+`BACKLOG_SYNC`, `SPEC_REVIEW`, `REVIEW` and `EPIC_REVIEW`; `sonnet` for `SPECIFICATION` and `PLANNING` (`opus`
+when the story is `risk: high`), `TEST_FIRST` and `IMPLEMENTATION`. A re-entered or repeated stage
+escalates to `opus`. `CLARIFICATION` uses your session model. Every history event records the
+model, so the split can be tuned after an epic from where loop-backs actually happened.
+
+## Loop-backs and rejections
+
+| From             | Key / reject target                                                     | To                                                             |
+| ---------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `SPEC_REVIEW`    | `changes_required` / `clarification_gap`                                | `SPECIFICATION` / `CLARIFICATION`                              |
+| `PLANNING`       | `specification_gap`                                                     | `SPECIFICATION`                                                |
+| `TEST_FIRST`     | `plan_gap` / `specification_gap`                                        | `PLANNING` / `SPECIFICATION`                                   |
+| `IMPLEMENTATION` | `partial` / `plan_gap`                                                  | `IMPLEMENTATION` / `PLANNING`                                  |
+| `REVIEW`         | `implementation_issues` / `test_gap` / `plan_gap` / `specification_gap` | `IMPLEMENTATION` / `TEST_FIRST` / `PLANNING` / `SPECIFICATION` |
+| Any human gate   | `/so:reject [stage] <comment>`                                          | `on_reject` or a listed `reject_targets` stage                 |
+
+A revised artifact is `DRAFT` again, so the story passes its gate again. The owner records what
+sent it back under `feedback` (never `inputs`, so no staleness cycle with the review) and answers
+each blocking finding in a **Feedback addressed** section; the reviewer re-checks those findings
+first. A web story that finds a
+gap in its api contract does not loop into the api story: it goes `BLOCKED`, and a backlog amend (`/so:epic <Epic> <feedback>`) adds a new api story and a replacement web story that depends on it; the blocked story is parked, then dropped.
+
+A change to a project document (a rule in `AGENTS.md` / `web-patterns.md`, the BRD, the epic, an
+ADR) makes every active-story artifact that read it stale: each input records the file's last
+commit. The next `/so:next` moves the story back to the earliest stale stage (`STALE_INPUT`);
+artifacts the change does not affect are only refreshed, not revised.
+
+A stage that runs more than `max_attempts` (3) times in a row is `BLOCKED` until you run
+`/so:next continue`.
 
 ## Code quality bar
 
-The harness exists to produce code a person reads easily. Planning, implementation and review
-stages apply the same bar (AGENTS.md §5):
+The harness exists to produce code a person reads easily (AGENTS.md §5):
 
-- concise and idiomatic for the framework: Next.js App Router, NestJS, Prisma, React Hook Form + Zod;
-- clear names over comments; comments explain _why_, never restate the code;
+- concise and idiomatic for Next.js App Router, NestJS, Prisma, React Hook Form + Zod;
+- clear names over comments; comments explain _why_;
 - small functions and components with one job; no speculative abstractions or unused options;
-- no duplication of styles, types or validation that already has a home;
-- `PLAN_REVIEW` rejects plans that add layers or abstractions the story does not need;
-  `IMPLEMENTATION_VERIFICATION` reports readability problems as findings, not just test results.
+- no duplicated styles, types or validation that already have a home.
 
-## Verification commands
+`PLANNING` must not add layers the story does not need; `REVIEW` reports readability problems as
+findings.
 
-`IMPLEMENTATION_VERIFICATION` records the exact commands and their results. Baseline, from the
-repo root:
+## Checks
+
+`REVIEW` runs, from the repo root:
 
 ```bash
 pnpm db:up
 pnpm --filter @archipelago/api prisma:generate
 pnpm turbo run lint typecheck test build
 pnpm --filter @archipelago/api test:e2e   # api stories that touch HTTP flows
-# web stories: unit, hook and component tests run inside `turbo run test` (ADR-001)
 ```
 
-Not available yet (add when first needed): module-boundary check (AGENTS.md §6), OpenAPI ↔
-generated client drift check, i18n key completeness check (`en`/`uk`), Playwright e2e (ADR-001).
+To add when first needed, as scripts rather than LLM judgement: module-boundary check, OpenAPI ↔
+generated client drift, `en`/`uk` key completeness, Playwright e2e (ADR-001).
 
-## Loop-backs
+## Compared with customer-portal
 
-Every review stage can send the story back with `verdict: CHANGES_REQUIRED` and a loop-back key
-defined for that stage in `stage-map.yaml`. Additions to the customer-portal map (all present in `stage-map.yaml`):
-
-| Stage             | New key               | Target      |
-| ----------------- | --------------------- | ----------- |
-| `DESIGN_REVIEW`   | `changes_required_ui` | `UI_DESIGN` |
-| `IMPACT_ANALYSIS` | `changes_required_ui` | `UI_DESIGN` |
-| `TEST_WRITING`    | `invalid_ui_design`   | `UI_DESIGN` |
-| `RECONCILIATION`  | `ui_gap`              | `UI_DESIGN` |
-
-A `web` story that finds a gap in its `api` contract does **not** loop into the `api` story; it
-goes `BLOCKED` with an open decision, and a new or reopened `api` story fixes the contract.
-
-All other loop-backs stay as in customer-portal (e.g. `SPEC_REVIEW → SPECIFICATION`,
-`IMPLEMENTATION_VERIFICATION → IMPLEMENTATION`, `RECONCILIATION story_source_conflict → BACKLOG_SYNC`).
-
-## Verdicts and statuses
-
-Same as customer-portal: verdicts `PASS`, `CHANGES_REQUIRED`, `BLOCKED`, `NOT_APPLICABLE`
-(optional stages only); artifact lifecycle `DRAFT → IN_REVIEW → APPROVED → SUPERSEDED / ARCHIVED`.
-
-## Terminal-stage meanings
-
-- **`READY_FOR_PR`** — all automated checks passed; a human opens or finalizes the Pull Request.
-- **`COMPLETED`** — a human confirms the PR was merged (or the delivery was explicitly closed).
-  Archive mode runs only from here.
-- **`ARCHIVED`** — knowledge consolidated, workflow state cleaned; artifacts are not moved.
+| customer-portal (per story)                                   | Archipelago                                                 |
+| ------------------------------------------------------------- | ----------------------------------------------------------- |
+| `BACKLOG_SYNC` per story from GitHub                          | `BACKLOG_SYNC` once per epic, with a human gate             |
+| `us-clarifier` writes Open Decisions alone                    | `story-clarifier` interviews you; epic decisions are shared |
+| `API_DESIGN`, `DB_DESIGN`, `DESIGN_REVIEW`, `IMPACT_ANALYSIS` | design sections in `spec.md`, impact in `plan.md`           |
+| `PLAN_REVIEW` + `HUMAN_PLAN_APPROVAL` always                  | plan gate only for `risk: high`                             |
+| `TEST_WRITING` / `springboot-implementor`                     | `TEST_FIRST` (red) / implementor by layer (green)           |
+| verification, security, reconciliation: three stages          | one fresh-context `REVIEW`                                  |
+| PR preparation, `READY_FOR_PR`, `COMPLETED`, `ARCHIVED`       | `HUMAN_ACCEPTANCE` → `DONE`                                 |
+| 22 stages, 5 human gates, ~20 artifacts                       | 11 stages, 2–3 human gates, 8 artifacts                     |
 
 ## Decisions and open questions
 
-| ID   | Topic                        | Status      | Decision / proposal                                                                                                                    |
-| ---- | ---------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| OQ-1 | Story source                 | **decided** | `story-slicer` cuts small stories from epics outside the per-story loop (user, 2026-11-09)                                             |
-| OQ-2 | `UI_DESIGN` as its own stage | **decided** | Separate optional stage, applies to `web` stories (user, 2026-11-09)                                                                   |
-| OQ-3 | Implementor                  | **decided** | Stories split by `layer`; one `IMPLEMENTATION` stage, Skill chosen by layer (user, 2026-11-09)                                         |
-| OQ-4 | Web test runner / e2e        | **decided** | Vitest + Testing Library for logic, hooks and components; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md) |
-| OQ-5 | Command prefix `/so:`        | **decided** | Keep `/so:approve` / `/so:reject` (user, 2026-11-09)                                                                                   |
-| OQ-6 | Story ID format              | **decided** | `US-<epic>-<nn>-<layer>`, e.g. `US-03-02-api`, `US-03-02-web` (user, 2026-11-09)                                                       |
+| ID   | Topic                 | Status      | Decision                                                                                                                                                                                                                                                                       |
+| ---- | --------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OQ-1 | Story source          | **decided** | `BACKLOG_SYNC` cuts the active epic into stories under `docs/stories/epic-<nn>/` (user, 2026-11-11)                                                                                                                                                                            |
+| OQ-2 | Design stages         | **decided** | Design is a section of `spec.md` per layer; replaces the separate `UI_DESIGN` stage (user, 2026-11-11)                                                                                                                                                                         |
+| OQ-3 | Implementor           | **decided** | One `IMPLEMENTATION` stage, Skill chosen by `layer` (user, 2026-11-09)                                                                                                                                                                                                         |
+| OQ-4 | Web test runner / e2e | **decided** | Vitest + Testing Library; Playwright for key journeys later — [ADR-001](../adr/ADR-001-web-testing.md)                                                                                                                                                                         |
+| OQ-5 | Command prefix        | **decided** | `/so:` (user, 2026-11-09)                                                                                                                                                                                                                                                      |
+| OQ-6 | Story ID format       | **decided** | `US-<epic>-<nn>-<layer>` (user, 2026-11-09)                                                                                                                                                                                                                                    |
+| OQ-7 | Workflow size         | **decided** | Compact flow, plan gate for `risk: high` only (user, 2026-11-11)                                                                                                                                                                                                               |
+| OQ-8 | Git flow              | **decided** | Epic branch `epic/<nn>-<slug>` from `dev` (local); one commit per accepted story on it; `EPIC_REVIEW` + `HUMAN_EPIC_ACCEPTANCE`, then `--no-ff` merge into `dev` and push `dev`; never commit on `dev`/`main`, never force (user, 2026-11-12). Rules: `stage-map.yaml` → `git` |

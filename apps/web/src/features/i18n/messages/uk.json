@@ -1,0 +1,20 @@
+{
+  "common": {
+    "appName": "Archipelago",
+    "appDescription": "Узгоджуйте вкладений час зі своїми пріоритетами."
+  },
+  "home": {
+    "tagline": "Обери фокус → Інвестуй час → Рефлексуй → Коригуй",
+    "workspaceSetup": "Налаштування робочого простору",
+    "inProgress": "У процесі"
+  },
+  "localeToggle": {
+    "label": "Мова",
+    "en": "EN",
+    "uk": "УКР"
+  },
+  "notFound": {
+    "title": "Сторінку не знайдено",
+    "backHome": "На головну"
+  }
+}

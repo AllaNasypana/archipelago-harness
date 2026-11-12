@@ -4,18 +4,25 @@
 
 ## Report
 
-- Health: `IDLE`, `HEALTHY`, `WAITING_FOR_HUMAN`, `BLOCKED`, `INCONSISTENT`, `COMPLETED`, `ARCHIVED`.
-- Story ID, layer, `depends_on` and its status; catalog status.
+- Health: `IDLE`, `HEALTHY`, `WAITING_FOR_HUMAN`, `BLOCKED` or `INCONSISTENT`.
+- Epic: ID, status, story counts by status from `backlog.md`.
+- Story: ID, layer, risk, `depends_on` and its status.
 - `current_stage`, `previous_stage`, `attempt`, `last_result`.
-- Current stage inputs and outputs: path, exists?, version, status; stale inputs.
-- Blocking Open Decisions; `TODO`/`TBD` markers in `APPROVED` inputs.
-- Pending gate with the artifacts to review and the exact command.
+- Current stage inputs and outputs: path, exists?, version, status; stale inputs, including
+  project documents whose `commit` changed (name the path and both commits) or have uncommitted
+  changes.
+- `OPEN` epic decisions affecting the story; `TODO`/`TBD` in `APPROVED` inputs.
+- Pending gate: artifacts to read and the exact commands.
 - Blocking issues; non-blocking findings count.
-- Git branch and unrelated working-tree changes.
-- Next stage and the recommended command.
+- Git: current branch vs `epic.branch`, uncommitted changes, commits on the epic branch ahead of
+  `dev`. `INCONSISTENT` when the branch differs, or when the epic is `DONE` but its branch still
+  exists unmerged (an acceptance stopped after the accept commit: name the remaining commands).
+- The recommended next command.
 
-When `IDLE`: list catalog stories with status `READY`, marking web stories whose api dependency
-is not ready, and slices waiting for approval (`status: DRAFT`).
+When no story is active: list `READY` stories in backlog order, marking web stories whose api
+dependency is not `DONE` and stories with an unfinished earlier story, warn about uncommitted
+changes in `apps/` or `packages/`, and recommend the first startable one.
 
-`INCONSISTENT` when: state files disagree; `current_stage` not in `stage_order`; two current
-artifacts of one type; a stale input; recorded state contradicts the files on disk.
+`INCONSISTENT` when: the state file contradicts itself or the files on disk; `current_stage` is
+not in `stage-map.yaml`; the backlog marks a story `ACTIVE` that the state does not name (or the
+reverse); an input is stale.

@@ -1,47 +1,57 @@
 # Artifact Front-Matter Schema
 
-The YAML front matter every story-level Markdown artifact carries. Owner Skills must write it;
-reviewers must validate it. Paths come from `artifact-paths.yaml`; statuses from
-`artifact-lifecycle.md`.
+The YAML front matter of every workflow Markdown artifact. Owners write it, reviewers validate it.
+Paths come from `artifact-paths.yaml`, statuses from `artifact-lifecycle.md`.
 
-## Produced artifacts
+## Story artifacts
+
+`clarification`, `specification`, `specification_review`, `implementation_plan`, `test_report`,
+`implementation_report`, `review`:
 
 ```yaml
 ---
 artifact_type: specification # a key from artifact-paths.yaml
 story: US-03-02-api
-layer: api # api | web — copied from the story
-version: 1 # starts at 1, +1 per revision
-status: DRAFT
-created_at: 2026-11-09T10:00:00Z # illustrative; always generated at runtime
-updated_at: 2026-11-09T10:00:00Z
-produced_by: spec-writer # the owner in artifact-paths.yaml
+layer: api # copied from the story
+version: 1 # +1 per revision
+status: DRAFT # DRAFT | APPROVED
+updated_at: 2026-11-11T10:00:00Z # illustrative; always from the clock at runtime
+produced_by: spec-writer # the registry owner (owner_by_layer for implementation_report)
 inputs: # every artifact read, with the version read
-  - { path: docs/stories/US-03-02-api/story.md, version: 1 }
-  - { path: docs/stories/US-03-02-api/open-decisions.md, version: 2 }
-supersedes: null # or the path of the replaced version
+  - { path: docs/stories/epic-03/US-03-02-api/story.md, version: 1 }
+  - { path: docs/stories/epic-03/US-03-02-api/clarification.md, version: 1 }
+  - { path: docs/stories/epic-03/decisions.md, version: 3 }
+  - { path: docs/product/archipelago-business-requirements.md, commit: 3f6e8b8a1c2d } # project document
+  - { path: apps/api/AGENTS.md, commit: 780cec0b9e41 }
+feedback: # only after a re-entry; not an input, never checked for staleness
+  - {
+      at: 2026-11-11T10:20:00Z,
+      from: SPEC_REVIEW,
+      key: changes_required,
+      path: docs/stories/epic-03/US-03-02-api/spec-review.md,
+      version: 1,
+    }
 ---
 ```
 
-| Field                       | Rule                                                                                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `artifact_type`             | A registry key in `artifact-paths.yaml`.                                                                                                                      |
-| `story`                     | Equals `workflow-state.yaml` `story`.                                                                                                                         |
-| `layer`                     | Equals the story's `layer`; an artifact with `applies_to` must match it.                                                                                      |
-| `version`                   | `1` on creation; a re-run that changes content increments it.                                                                                                 |
-| `status`                    | New artifacts start `DRAFT`; later changes are recorded by the orchestrator.                                                                                  |
-| `created_at` / `updated_at` | From the system clock at runtime. Dates in Skill examples are labelled illustrative.                                                                          |
-| `produced_by`               | The registry `owner` (or the `owner_by_layer` entry for the story's layer).                                                                                   |
-| `inputs[]`                  | One entry per consumed artifact or project document with the version read; enables stale-input checks. A web story lists its api dependency's `openapi` here. |
-| `supersedes`                | `null`, or the replaced file; that file becomes `SUPERSEDED`.                                                                                                 |
+| Field        | Rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `story`      | Equals `workflow-state.yaml` `story.id`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `version`    | `1` on creation; a run that changes content increments it.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `status`     | Owners write `DRAFT`; `APPROVED` per `artifact-lifecycle.md` §1.                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `inputs[]`   | Every workflow artifact read, with its version. A web story lists its dependency's `spec.md`. Project documents (BRD, PRD, epic, ADR, design index, `agents_rules`, every `layer_rules` file) are listed with `commit` instead of `version`: the output of `git log -1 --format=%h --abbrev=12 -- <path>` when read. A project document with uncommitted changes cannot be pinned: `BLOCKED`, "commit <path> first". Never a review or a later stage's artifact that sent the work back: that goes to `feedback`. |
+| `feedback[]` | One entry per loop-back or rejection this artifact has answered, appended, never removed: `at` = `timestamp` of the re-entry event in `history.jsonl`, `from` = the sending stage, then `key` + `path` + `version` of the sending artifact (loop-back) or `comment` (human rejection). Omitted until the first re-entry.                                                                                                                                                                                          |
 
-**Staleness:** if an input recorded at `version: N` is now at `N+1`, the artifact is stale and
-blocks progression (`verdict: BLOCKED`) until its stage re-runs.
+Review artifacts (`specification_review`, `review`) also carry `verdict:` — the same value as the
+result envelope.
+
+`specification` also carries `risk: normal | high` — the story's risk after the spec; the
+orchestrator raises `story.risk` in state when it is `high` (risk never goes down).
 
 ## Story (`story.md`)
 
-Created by `backlog-sync` from an approved slice or a GitHub Issue. It is a workflow **input**,
-so it has no `produced_by` / `inputs`. Its backlog status lives in the catalog, not here.
+Written by `backlog-sync`, amended by `story-clarifier` with the confirmed changes. Its status
+lives in `backlog.md`, not here.
 
 ```yaml
 ---
@@ -49,56 +59,105 @@ id: US-03-02-api
 epic: EPIC-03
 layer: api # api | web
 title: Create a Goal
-depends_on: null # web only: the api story whose contract it consumes, e.g. US-03-02-api; null = no API contract (pure UI / BFF plumbing). Api stories: always null (table order).
-brd_refs: [FR-016, BR-009] # BRD requirement IDs this story delivers
-epic_refs: [GOAL-AC-01, GOAL-AC-02] # epic acceptance criteria IDs
-source:
-  type: local_slice # local_slice | github_issue
-  slice: docs/stories/slices/EPIC-03-slice.md
-  issue_url: null
-  last_synced_at: null
+risk: normal # normal | high (stage-map.yaml story_rules.risk)
+depends_on: null # web only: the api story whose endpoints it calls; null otherwise
+brd_refs: [FR-016, BR-009]
+epic_refs: [GOAL-AC-01, GOAL-AC-02]
+version: 1 # +1 when CLARIFICATION applies changes
 ---
 ```
 
-The body holds the user story sentence and at most ~5 acceptance criteria (`AC-1` …), each
-testable on its own (small-story rules in `stage-map.yaml` `pre_workflow`).
+Body: the user story sentence, then 2–5 acceptance criteria (`AC-1` …) in Given/When/Then, each
+testable on its own; for `web`, the mockup panels and design corrections that apply.
 
-## Story slice (`slices/EPIC-<nn>-slice.md`)
+## Backlog (`backlog.md`)
 
 ```yaml
 ---
-artifact_type: story_slice
+artifact_type: backlog
 epic: EPIC-03
 version: 1
-status: DRAFT # APPROVED after the human approves the slice
-produced_by: story-slicer
-created_at: 2026-11-09T10:00:00Z # illustrative
+status: DRAFT # APPROVED at HUMAN_BACKLOG_APPROVAL
+updated_at: 2026-11-11T09:00:00Z
+produced_by: backlog-sync
 inputs:
-  - { path: docs/epics/EPIC-03_Goals_Management.md, version: null }
+  - { path: docs/epics/EPIC-03_Goals_Management.md, commit: <12-char sha> }
+  - { path: docs/product/archipelago-business-requirements.md, commit: <12-char sha> }
+  - { path: docs/product/Archipelago_PRD_v1.2.md, commit: <12-char sha> }
 ---
 ```
 
-The body is one table: `ID | layer | title | depends_on | BRD refs | epic refs | ACs (count)`,
-followed by one short section per story with its acceptance criteria.
+Body, in this order:
 
-## OpenAPI contract (`openapi.yaml`)
+1. **Stories** — one table in delivery order:
+   `ID | Layer | Title | Depends on | Risk | BRD refs | Epic refs | ACs | Status`. Foundation
+   stories (`US-00-…`) used by this epic appear here too, linked to their `epic-00` folder.
+2. **Coverage** — every epic AC mapped to stories, or marked `deferred` / `out of scope` with
+   the reason; then **Carried over**: every decision from another epic that hands off to this
+   one, with its ACs mapped to stories (or the constraint applied).
+3. **Open questions** — what blocks slicing (resolved ones move to `decisions.md`), "needs an
+   ADR" items, and non-blocking "PRD drift" notes for the owner.
 
-YAML, not Markdown, so it carries traceability in extension keys instead of front matter:
+Only the orchestrator edits the Status column after approval, and raises Risk when
+`SPECIFICATION` does (`story.md` keeps the risk proposed at slicing).
+
+An amend adds a fourth section, **Amendment**: what changed in this version and a **Drop on
+approval** list of `READY` stories it replaces, each with the reason.
+
+## Epic decisions (`decisions.md`)
 
 ```yaml
-openapi: 3.1.0
-info:
-  title: Archipelago API — US-03-02-api
-  version: '1' # mirrors the paired api_design version
-x-story: US-03-02-api
-x-source-specification: docs/stories/US-03-02-api/spec.md
-x-source-specification-version: 1
-x-produced-by: openapi-designer
+---
+artifact_type: epic_decisions
+epic: EPIC-03
+version: 1
+updated_at: 2026-11-11T09:00:00Z
+produced_by: backlog-sync
+---
 ```
 
-The paired `api_design.md` carries the full front matter and anchors traceability.
+One entry per decision, never renumbered:
+
+```markdown
+### D-03-01 — Goal name uniqueness scope
+
+- **Status:** OPEN | DECIDED
+- **Question:** …
+- **Decision:** … (empty while OPEN)
+- **Source:** human, YYYY-MM-DD, at US-03-02-api CLARIFICATION | BRD BR-009
+- **Affects:** US-03-02-api, US-03-02-web
+- **Hands off to:** EPIC-06 (only when the decision gives work or a constraint to another epic's backlog)
+```
+
+`backlog-sync` of a later epic finds its carry-over through **Hands off to** (`backlog-sync`
+→ Carry-over).
+
+A story whose clarification depends on an `OPEN` decision cannot pass `CLARIFICATION`. A decision
+that is project-wide (AGENTS.md §5 conventions) is not recorded here: it becomes a proposed ADR.
+
+## Epic review (`epic-review.md`)
+
+```yaml
+---
+artifact_type: epic_review
+epic: EPIC-03
+version: 1
+status: DRAFT # APPROVED at HUMAN_EPIC_ACCEPTANCE
+verdict: PASS # PASS | CHANGES_REQUIRED | BLOCKED
+reviewed_commit: 4f2a9c1d7e3b # HEAD of the epic branch the checks ran on (12 chars)
+base_commit: 9b1e0a3c5d77 # dev at review time; the merge preview ran against it
+updated_at: 2026-11-20T09:00:00Z
+produced_by: epic-reviewer
+inputs:
+  - { path: docs/stories/epic-03/backlog.md, version: 4 }
+  - { path: docs/stories/epic-03/decisions.md, version: 6 }
+  - { path: docs/epics/EPIC-03_Goals_Management.md, commit: <12-char sha> }
+---
+```
+
+`/so:approve` at `HUMAN_EPIC_ACCEPTANCE` refuses when the epic branch HEAD is no longer
+`reviewed_commit` (work landed after the review).
 
 ## Files without front matter
 
-`story_catalog` (YAML), `workflow_state`, `active_story` and `workflow_history` (JSONL) follow
-`state-schema.md`.
+`workflow-state.yaml` and `history.jsonl` follow `state-schema.md`.
